@@ -1,0 +1,123 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  }
+
+body {
+background: #101820;
+color: white;
+min-height: 100vh;
+}
+
+/* Üst Menü */
+
+header {
+width: 100%;
+padding: 20px 50px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+background: #16232e;
+}
+
+.logo {
+font-size: 24px;
+font-weight: bold;
+}
+
+nav a {
+color: white;
+text-decoration: none;
+margin-left: 25px;
+font-size: 16px;
+transition: 0.3s;
+}
+
+nav a:hover {
+color: #4ade80;
+}
+
+/* Ana Bölüm */
+
+.hero {
+min-height: calc(100vh - 140px);
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+padding: 20px;
+}
+
+.hero h1 {
+font-size: 55px;
+margin-bottom: 15px;
+}
+
+.hero h1 span {
+color: #4ade80;
+}
+
+.hero p {
+font-size: 20px;
+color: #b8c2cc;
+max-width: 650px;
+line-height: 1.6;
+margin-bottom: 30px;
+}
+
+/* Buton */
+
+.button {
+display: inline-block;
+padding: 13px 28px;
+background: #4ade80;
+color: #101820;
+text-decoration: none;
+border-radius: 8px;
+font-weight: bold;
+transition: 0.3s;
+}
+
+.button:hover {
+transform: scale(1.05);
+background: #22c55e;
+}
+
+/* Alt Kısım */
+
+footer {
+text-align: center;
+padding: 20px;
+background: #16232e;
+color: #9ca3af;
+}
+
+/* Telefonlar */
+
+@media (max-width: 700px) {
+
+```
+header {
+    padding: 20px;
+    flex-direction: column;
+    gap: 15px;
+}
+
+nav a {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.hero h1 {
+    font-size: 38px;
+}
+
+.hero p {
+    font-size: 17px;
+}
+```
+
+}

@@ -1,51 +1,84 @@
-// Sayfa tamamen yüklendiğinde çalışır
 document.addEventListener("DOMContentLoaded", function () {
 
 ```
-// Ana bölümde küçük açılış animasyonu
-const hero = document.querySelector(".hero");
+/* =========================
+   SAYFA AÇILIŞ ANİMASYONU
+========================= */
 
-if (hero) {
-    hero.style.opacity = "0";
-    hero.style.transform = "translateY(20px)";
-    hero.style.transition = "all 0.8s ease";
+const sections = document.querySelectorAll(".section");
 
-    setTimeout(function () {
-        hero.style.opacity = "1";
-        hero.style.transform = "translateY(0)";
-    }, 100);
-}
+const observer = new IntersectionObserver(
+    function (entries) {
 
+        entries.forEach(function (entry) {
 
-// "Projelerime Bak" butonu
-const projectButton = document.querySelector(".button");
+            if (entry.isIntersecting) {
 
-if (projectButton) {
-    projectButton.addEventListener("click", function (event) {
-        event.preventDefault();
+                entry.target.classList.add("show");
 
-        alert("Projeler bölümü yakında burada olacak! 🎮");
-    });
-}
+            }
+
+        });
+
+    },
+    {
+        threshold: 0.15
+    }
+);
 
 
-// Menü bağlantıları
-const menuLinks = document.querySelectorAll("nav a");
+sections.forEach(function (section) {
+    observer.observe(section);
+});
 
-menuLinks.forEach(function (link) {
 
-    link.addEventListener("click", function (event) {
+/* =========================
+   MENÜ TIKLAMA
+========================= */
 
-        // "#" olan bağlantılarda sayfanın yukarı zıplamasını engelle
-        if (link.getAttribute("href") === "#") {
-            event.preventDefault();
+const links = document.querySelectorAll("nav a");
 
-            alert("Bu bölüm yakında eklenecek! 🚀");
+links.forEach(function (link) {
+
+    link.addEventListener("click", function () {
+
+        const target = document.querySelector(
+            link.getAttribute("href")
+        );
+
+        if (target) {
+
+            target.scrollIntoView({
+                behavior: "smooth"
+            });
+
         }
 
     });
 
 });
+
+
+/* =========================
+   KONSOL MESAJI
+========================= */
+
+console.log("🚀 Göktuğ'un sitesi başarıyla çalışıyor!");
 ```
 
 });
+
+/* =========================
+OYUN BUTONU
+========================= */
+
+function gameMessage() {
+
+```
+alert(
+    "🎮 Bu oyun henüz hazır değil!\n\n" +
+    "Yakında buraya oyunun indirme veya oynama bağlantısını ekleyeceğiz. 🚀"
+);
+```
+
+}

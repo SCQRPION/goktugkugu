@@ -1,4 +1,152 @@
 // ----------------------------------------------------
+// HESAP / GİRİŞ / ADMİN SİSTEMİ
+// Not: GitHub Pages statik olduğu için bu sistem tarayıcıdaki localStorage
+// üzerinde çalışır; gerçek kullanıcı veritabanı/güvenli kimlik doğrulama değildir.
+// ----------------------------------------------------
+const AUTH_KEY = "goktug_site_users_v1";
+const CURRENT_KEY = "goktug_site_current_user_v1";
+const ADMIN_CODE = "ADMİN GELDİ123";
+const DEFAULT_ADMIN_NAME = "ADMIN";
+const DEFAULT_ADMIN_PASSWORD = "1234";
+
+const authGate = document.getElementById("authGate");
+const loginPanel = document.getElementById("loginPanel");
+const registerPanel = document.getElementById("registerPanel");
+const adminPanelLogin = document.getElementById("adminPanelLogin");
+const authMessage = document.getElementById("authMessage");
+const userPanel = document.getElementById("userPanel");
+const userPanelContent = document.getElementById("userPanelContent");
+const adminDashboard = document.getElementById("adminDashboard");
+const accountNotice = document.getElementById("accountNotice");
+
+function getUsers(){ try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"[]");}catch{return [];} }
+function saveUsers(users){localStorage.setItem(AUTH_KEY,JSON.stringify(users));}
+function cleanName(v){return String(v||"").trim();}
+function validName(v){return cleanName(v).length>=1 && cleanName(v).length<=12;}
+function validPassword(v){return /^\d{4}$/.test(String(v||""));}
+function showAuthMessage(text, good=false){if(!authMessage)return;authMessage.textContent=text;authMessage.className="auth-message "+(good?"good":"bad");}
+function switchAuth(view){
+    loginPanel.hidden=view!=="login"; registerPanel.hidden=view!=="register"; adminPanelLogin.hidden=view!=="admin";
+    showAuthMessage("");
+}
+function getCurrent(){try{return JSON.parse(localStorage.getItem(CURRENT_KEY)||"null");}catch{return null;}}
+function setCurrent(user){localStorage.setItem(CURRENT_KEY,JSON.stringify(user));}
+function clearCurrent(){localStorage.removeItem(CURRENT_KEY);}
+
+function showAccountNotice(text){
+    if(!accountNotice)return; accountNotice.textContent=text; accountNotice.hidden=false;
+    setTimeout(()=>{accountNotice.hidden=true;},7000);
+}
+function enterSite(user){
+    setCurrent({name:user.name,isAdmin:!!user.isAdmin});
+    authGate.hidden=true; document.body.classList.remove("auth-locked");
+    if(user.isAdmin){
+        userPanel.hidden=true; adminDashboard.hidden=false;
+        document.getElementById("adminWelcome").textContent=`HOŞ GELDİN ${user.name} ADMİN`;
+        renderAdminUsers();
+    }else{
+        userPanel.hidden=false; updateUserPanel(user);
+    }
+}
+function updateUserPanel(user){
+    const full=getUsers().find(u=>u.name===user.name);
+    document.getElementById("userPanelWelcome").textContent=`HOŞ GELDİN ${user.name}`;
+    document.getElementById("currentUserName").textContent=full?.name||user.name;
+    document.getElementById("currentUserPassword").textContent=full?.password||"••••";
+}
+function logout(){clearCurrent();location.reload();}
+
+function renderAdminUsers(){
+    const list=document.getElementById("adminUsersList"); if(!list)return;
+    const users=getUsers();
+    if(!users.length){list.innerHTML='<p class="admin-empty">Henüz kayıtlı kullanıcı yok.</p>';return;}
+    list.innerHTML=users.map((u,i)=>`
+      <div class="admin-user-row" data-index="${i}">
+        <div><strong>${escapeHtml(u.name)}</strong>${u.banned?'<span class="ban-tag">BANLI</span>':''}</div>
+        <input class="admin-edit-name" maxlength="12" value="${escapeHtml(u.name)}" aria-label="Kullanıcı adı">
+        <input class="admin-edit-password" maxlength="4" inputmode="numeric" value="${escapeHtml(u.password)}" aria-label="Kullanıcı şifresi">
+        <button class="admin-save-user" type="button">Kaydet</button>
+        <button class="admin-ban-user ${u.banned?'unban':''}" type="button">${u.banned?'Banı Kaldır':'Banla'}</button>
+      </div>`).join("");
+    list.querySelectorAll(".admin-save-user").forEach(btn=>btn.addEventListener("click",()=>{
+        const row=btn.closest(".admin-user-row"), idx=Number(row.dataset.index), users=getUsers(), old=users[idx];
+        const newName=cleanName(row.querySelector(".admin-edit-name").value), newPass=row.querySelector(".admin-edit-password").value;
+        if(!validName(newName)||!validPassword(newPass)){alert("İsim 1-12 karakter, şifre tam 4 rakam olmalı.");return;}
+        if(users.some((x,j)=>j!==idx&&x.name.toLowerCase()===newName.toLowerCase())){alert("Bu isim zaten kullanılıyor.");return;}
+        users[idx]={...old,name:newName,password:newPass}; saveUsers(users);
+        localStorage.setItem("goktug_user_notice_"+old.name, JSON.stringify({text: old.name!==newName?`Admin ismini değiştirdi. Yeni ismin: ${newName}`:`Admin şifreni değiştirdi. Yeni şifren: ${newPass}`,at:Date.now()}));
+        localStorage.setItem("goktug_last_user_update",Date.now().toString());
+        renderAdminUsers();
+    }));
+    list.querySelectorAll(".admin-ban-user").forEach(btn=>btn.addEventListener("click",()=>{
+        const row=btn.closest(".admin-user-row"), idx=Number(row.dataset.index), users=getUsers(); users[idx].banned=!users[idx].banned; saveUsers(users);
+        localStorage.setItem("goktug_last_user_update",Date.now().toString()); renderAdminUsers();
+    }));
+}
+function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+function initAuth(){
+    document.body.classList.add("auth-locked");
+    const current=getCurrent();
+    if(current){
+        const users=getUsers();
+        if(current.isAdmin){enterSite({name:current.name,isAdmin:true});return;}
+        const user=users.find(u=>u.name===current.name);
+        if(user&&!user.banned){enterSite(user); checkUserNotice(user);} else clearCurrent();
+    }
+    switchAuth("login");
+}
+function checkUserNotice(user){
+    const key="goktug_user_notice_"+user.name, raw=localStorage.getItem(key);
+    if(raw){try{const n=JSON.parse(raw); if(n.at>Date.now()-86400000){showAccountNotice(n.text);} localStorage.removeItem(key);}catch{}}
+}
+
+document.getElementById("showRegister")?.addEventListener("click",()=>switchAuth("register"));
+document.getElementById("showLoginFromRegister")?.addEventListener("click",()=>switchAuth("login"));
+document.getElementById("showAdmin")?.addEventListener("click",()=>switchAuth("admin"));
+document.getElementById("showLoginFromAdmin")?.addEventListener("click",()=>switchAuth("login"));
+
+document.getElementById("registerButton")?.addEventListener("click",()=>{
+    const name=cleanName(document.getElementById("registerName").value), password=document.getElementById("registerPassword").value;
+    if(!validName(name)){showAuthMessage("İsim 1 ile 12 karakter arasında olmalı.");return;}
+    if(!validPassword(password)){showAuthMessage("Şifre tam olarak 4 rakam olmalı.");return;}
+    const users=getUsers(); if(users.some(u=>u.name.toLowerCase()===name.toLowerCase())){showAuthMessage("Bu isimle zaten hesap var.");return;}
+    const user={name,password,banned:false,createdAt:Date.now()}; users.push(user); saveUsers(users);
+    document.getElementById("loginName").value=name; document.getElementById("loginPassword").value=password;
+    switchAuth("login"); showAuthMessage("Hesap oluşturuldu! Şimdi giriş yapabilirsin.",true);
+    document.getElementById("loginButton").click();
+});
+
+document.getElementById("loginButton")?.addEventListener("click",()=>{
+    const name=cleanName(document.getElementById("loginName").value), password=document.getElementById("loginPassword").value;
+    const user=getUsers().find(u=>u.name===name);
+    if(!user||user.password!==password){showAuthMessage("SENİ YALANCI HESAP AÇIP GEL");return;}
+    if(user.banned){showAuthMessage("Bu hesap admin tarafından banlandı.");return;}
+    enterSite(user); checkUserNotice(user);
+});
+
+document.getElementById("adminLoginButton")?.addEventListener("click",()=>{
+    const name=cleanName(document.getElementById("adminName").value), password=document.getElementById("adminPassword").value, code=document.getElementById("adminCode").value;
+    if(name!==DEFAULT_ADMIN_NAME||password!==DEFAULT_ADMIN_PASSWORD||code!==ADMIN_CODE){showAuthMessage("Admin bilgileri hatalı.");return;}
+    enterSite({name,isAdmin:true});
+});
+
+document.getElementById("userPanelButton")?.addEventListener("click",()=>{userPanelContent.hidden=!userPanelContent.hidden;});
+document.getElementById("logoutButton")?.addEventListener("click",logout);
+document.getElementById("adminLogout")?.addEventListener("click",logout);
+document.getElementById("adminCloseDashboard")?.addEventListener("click",()=>{adminDashboard.hidden=true;});
+
+window.addEventListener("storage",()=>{
+    const current=getCurrent(); if(!current||current.isAdmin)return;
+    const user=getUsers().find(u=>u.name===current.name);
+    if(!user)return;
+    if(user.banned){alert("Admin bu hesabı banladı.");logout();return;}
+    updateUserPanel(user);
+});
+
+initAuth();
+
+// ----------------------------------------------------
 // PLAY STORE - KATEGORİYE GÖRE RASTGELE OYUN
 // ----------------------------------------------------
 
@@ -166,6 +314,7 @@ const lessonProgress = document.getElementById("lessonProgress");
 const lessonContent = document.getElementById("lessonContent");
 const exerciseBox = document.getElementById("exerciseBox");
 const courseFeedback = document.getElementById("courseFeedback");
+const lessonInfo = document.getElementById("lessonInfo");
 const courseBox = document.querySelector(".course-box");
 
 const courseLanguages = {
@@ -342,6 +491,7 @@ function renderLesson() {
         <button id="checkExercise" class="exercise-check" type="button">Cevabı Kontrol Et</button>
     `;
     courseFeedback.textContent = "";
+    if (lessonInfo) lessonInfo.hidden = true;
 
     const input = document.getElementById("exerciseInput");
     const check = document.getElementById("checkExercise");
@@ -355,34 +505,63 @@ function normalizeAnswer(value) {
     return value.toLowerCase().trim().replace(/[<>"'`]/g, "").replace(/\s+/g, " ");
 }
 
+function playCourseSound(type){
+    try{
+        const C=window.AudioContext||window.webkitAudioContext; if(!C)return;
+        const ctx=new C(), osc=ctx.createOscillator(), gain=ctx.createGain();
+        osc.type=type==="correct"?"sine":"square";
+        osc.frequency.setValueAtTime(type==="correct"?660:180,ctx.currentTime);
+        if(type==="correct")osc.frequency.exponentialRampToValueAtTime(990,ctx.currentTime+.18);
+        gain.gain.setValueAtTime(.0001,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.02); gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.35);
+        osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.36);
+    }catch(e){}
+}
+
+function showLessonInfo(lesson, lang){
+    if(!lessonInfo)return;
+    const tipMap={
+      "HTML nedir?":"HTML dosyaları genellikle .html uzantısıyla kaydedilir. Tarayıcı bu dosyayı okuyup sayfanın iskeletini oluşturur.",
+      "CSS nedir?":"CSS ile HTML'nin yapısını değiştirmeden görünümünü değiştirebilirsin. Bu yüzden HTML + CSS birlikte çok kullanılır.",
+      "JavaScript nedir?":"JavaScript sadece tarayıcıda değil, sunucu tarafında ve farklı uygulamalarda da kullanılabilir.",
+      "Python nedir?":"Python'da kodun okunabilir olması özellikle yeni başlayanlar için büyük bir avantajdır.",
+      "C# nedir?":"C# Unity'de oyun davranışları oluşturmak için en çok kullanılan dillerden biridir.",
+      "C++ nedir?":"C++ oyun motorları, masaüstü yazılımları ve performansın önemli olduğu birçok sistemde kullanılır.",
+      "Java nedir?":"Java, farklı işletim sistemlerinde çalışabilen uygulamalar geliştirmek için uzun süredir kullanılan bir dildir.",
+      "SQL nedir?":"SQL veritabanındaki bilgileri eklemek, bulmak, değiştirmek ve silmek için kullanılır."
+    };
+    const info=lesson.tip||tipMap[lesson.title]||`${lang.name} öğrenirken bu kavramı küçük projelerde tekrar etmek öğrenmeyi kolaylaştırır.`;
+    lessonInfo.innerHTML=`<div class="lesson-info-icon">💡</div><div><strong>Bölüm Bilgisi</strong><p>${info}</p></div><button id="nextLessonButton" type="button">➡️ Sonraki Bölüm</button>`;
+    lessonInfo.hidden=false;
+    document.getElementById("nextLessonButton")?.addEventListener("click",advanceLesson);
+}
+function advanceLesson(){
+    const lang=courseLanguages[activeLanguage];
+    lessonIndex++;
+    if(lessonIndex>=lang.lessons.length){
+        lessonIndex=lang.lessons.length-1; lessonProgressPercent.textContent="100%"; lessonProgress.style.width="100%";
+        courseFeedback.textContent="🎉 Bu dildeki başlangıç derslerini tamamladın!";
+        if(lessonInfo)lessonInfo.hidden=true; return;
+    }
+    renderLesson();
+}
 function checkAnswer(input, answer) {
     if (!input || !courseBox) return;
     const correct = normalizeAnswer(input.value) === normalizeAnswer(answer);
-    courseBox.classList.remove("course-correct", "course-wrong");
-    void courseBox.offsetWidth;
-
+    courseBox.classList.remove("course-correct", "course-wrong"); void courseBox.offsetWidth;
     if (!correct) {
-        courseBox.classList.add("course-wrong");
+        playCourseSound("wrong"); courseBox.classList.add("course-wrong");
         courseFeedback.textContent = "❌ Yanlış cevap. Tekrar dene!";
-        setTimeout(() => courseBox.classList.remove("course-wrong"), 3000);
-        return;
+        setTimeout(() => courseBox.classList.remove("course-wrong"), 3000); return;
     }
-
-    courseBox.classList.add("course-correct");
-    courseFeedback.textContent = "✅ Doğru! Sonraki derse geçiliyor...";
+    playCourseSound("correct"); courseBox.classList.add("course-correct");
+    courseFeedback.textContent = "✅ Doğru! Bölümü geçtin. Önce kısa bir bilgi!";
     setTimeout(() => {
         courseBox.classList.remove("course-correct");
-        lessonIndex++;
-        if (lessonIndex >= courseLanguages[activeLanguage].lessons.length) {
-            courseFeedback.textContent = "🎉 Bu seviyedeki dersleri tamamladın! Diğer seçtiğin dile geçebilirsin.";
-            lessonIndex = courseLanguages[activeLanguage].lessons.length - 1;
-            lessonProgressPercent.textContent = "100%";
-            lessonProgress.style.width = "100%";
-            return;
-        }
-        renderLesson();
-    }, 3000);
+        const lang=courseLanguages[activeLanguage], lesson=lang.lessons[lessonIndex];
+        showLessonInfo(lesson,lang);
+    },3000);
 }
+
 
 if (courseButton) courseButton.addEventListener("click", openCourse);
 if (courseClose) courseClose.addEventListener("click", closeCourse);

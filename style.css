@@ -760,3 +760,46 @@ footer {
     .language-tabs { margin-top: 14px; }
     .lesson-content, .exercise-box { padding: 18px; }
 }
+
+/* ----------------------------------------------------
+   GİRİŞ / KULLANICI / ADMİN
+---------------------------------------------------- */
+body.auth-locked { overflow: hidden; }
+.auth-gate { position: fixed; inset: 0; z-index: 50000; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(2,10,6,.96); backdrop-filter:blur(12px); }
+.auth-gate[hidden], .auth-panel[hidden], .admin-dashboard[hidden], .user-panel[hidden], .account-notice[hidden], .lesson-info[hidden] { display:none !important; }
+.auth-box { width:min(520px,100%); padding:34px; border:1px solid rgba(74,222,128,.35); border-radius:26px; background:linear-gradient(145deg,#0a2115,#06120d); box-shadow:0 30px 100px rgba(0,0,0,.7); text-align:center; }
+.auth-logo { font-size:3rem; margin-bottom:8px; }
+.auth-box h2 { font-size:clamp(1.6rem,4vw,2.3rem); line-height:1.2; margin-bottom:10px; }
+.auth-note { color:#a7f3d0; margin-bottom:22px; }
+.auth-panel { display:grid; gap:12px; }
+.auth-input { width:100%; min-height:52px; padding:12px 15px; border-radius:12px; border:1px solid rgba(134,239,172,.2); background:#06120d; color:white; outline:none; font-size:1rem; }
+.auth-input:focus { border-color:#4ade80; box-shadow:0 0 0 3px rgba(74,222,128,.1); }
+.auth-action { min-height:54px; border:0; border-radius:13px; background:#16a05a; color:white; font-weight:900; cursor:pointer; font-size:1rem; }
+.auth-action:hover { filter:brightness(1.08); }
+.admin-action { background:#7c3aed; }
+.auth-link { border:0; background:transparent; color:#86efac; cursor:pointer; font-weight:800; padding:7px; }
+.admin-link { color:#c4b5fd; }
+.auth-message { min-height:28px; margin-top:14px; font-weight:900; }
+.auth-message.bad { color:#fca5a5; } .auth-message.good { color:#86efac; }
+.user-panel { position:fixed; top:82px; left:18px; z-index:1000; }
+.user-panel-button { border:1px solid rgba(134,239,172,.3); border-radius:12px; padding:11px 14px; background:#0b7a43; color:white; font-weight:900; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,.25); }
+.user-panel-content { margin-top:8px; width:240px; padding:16px; border-radius:15px; background:#07170e; border:1px solid rgba(74,222,128,.25); box-shadow:0 20px 50px rgba(0,0,0,.4); }
+.user-panel-content p { color:#a7f3d0; margin-top:6px; }
+.user-panel-content span { color:white; word-break:break-word; }
+.user-panel-content button { margin-top:12px; border:0; border-radius:9px; padding:9px 12px; background:#dc2626; color:white; font-weight:800; cursor:pointer; }
+.admin-dashboard { position:fixed; inset:0; z-index:40000; background:rgba(0,0,0,.82); display:flex; align-items:center; justify-content:center; padding:20px; }
+.admin-dashboard-box { width:min(1000px,100%); max-height:90vh; overflow:auto; padding:30px; border-radius:24px; background:#07170e; border:1px solid rgba(196,181,253,.35); box-shadow:0 30px 100px rgba(0,0,0,.7); }
+.admin-dashboard-head { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; }
+.admin-dashboard-head button { width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:white;font-size:28px;cursor:pointer; }
+.admin-note,.admin-empty { color:#a7f3d0; margin:8px 0 20px; }
+.admin-users-list { display:grid; gap:12px; margin-bottom:20px; }
+.admin-user-row { display:grid; grid-template-columns:1.2fr 1.4fr 1fr auto auto; gap:8px; align-items:center; padding:12px; border:1px solid rgba(134,239,172,.12); border-radius:14px; background:rgba(13,35,24,.72); }
+.admin-user-row input { min-width:0; padding:10px; border-radius:9px; border:1px solid rgba(134,239,172,.18); background:#06120d;color:white; }
+.admin-user-row button { padding:10px 11px;border:0;border-radius:9px;color:white;font-weight:800;cursor:pointer;background:#16a05a; }
+.admin-user-row .admin-ban-user { background:#dc2626; } .admin-user-row .admin-ban-user.unban { background:#0ea5e9; }
+.ban-tag { margin-left:8px; padding:3px 7px; border-radius:999px; background:#dc2626; color:white; font-size:.7rem; }
+.account-notice { position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:60000; width:min(700px,calc(100% - 30px)); padding:16px 20px; border-radius:14px; background:#16a05a; color:white; text-align:center; font-weight:900; box-shadow:0 15px 40px rgba(0,0,0,.35); }
+.lesson-info { margin-top:16px; padding:20px; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:15px; border:1px solid rgba(74,222,128,.3); border-radius:17px; background:rgba(22,160,90,.13); }
+.lesson-info-icon { font-size:2rem; } .lesson-info strong { font-size:1.15rem; } .lesson-info p { color:#c7f9dc; margin-top:4px; }
+.lesson-info button { border:0; border-radius:10px; padding:11px 14px; background:#16a05a; color:white; font-weight:900; cursor:pointer; }
+@media(max-width:700px){ .auth-box{padding:25px 18px}.user-panel{top:70px;left:10px}.admin-user-row{grid-template-columns:1fr 1fr}.admin-user-row>div{grid-column:1/-1}.lesson-info{grid-template-columns:1fr}.lesson-info button{width:100%} }

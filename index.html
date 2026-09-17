@@ -19,6 +19,64 @@
     </nav>
 </header>
 
+<!-- GİRİŞ / HESAP SİSTEMİ -->
+<div id="authGate" class="auth-gate" aria-hidden="false">
+    <div class="auth-box">
+        <div class="auth-logo">🔐</div>
+        <p class="small-title">GÜVENLİ GİRİŞ</p>
+        <h2 id="authTitle">Lütfen giriş yapın veya hesap oluşturun</h2>
+        <p class="auth-note">Siteyi kullanmak için önce bir hesapla giriş yapmalısın.</p>
+
+        <div id="loginPanel" class="auth-panel">
+            <input id="loginName" class="auth-input" type="text" maxlength="12" placeholder="İsim (en fazla 12 karakter)">
+            <input id="loginPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="4 haneli şifre">
+            <button id="loginButton" class="auth-action" type="button">🚪 GİRİŞ YAP</button>
+            <button id="showRegister" class="auth-link" type="button">Hesabım yok — Hesap Oluştur</button>
+            <button id="showAdmin" class="auth-link admin-link" type="button">👑 Admin Girişi</button>
+        </div>
+
+        <div id="registerPanel" class="auth-panel" hidden>
+            <input id="registerName" class="auth-input" type="text" maxlength="12" placeholder="İsim (1-12 karakter)">
+            <input id="registerPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="Şifre (tam 4 hane)">
+            <button id="registerButton" class="auth-action" type="button">✨ HESAP OLUŞTUR</button>
+            <button id="showLoginFromRegister" class="auth-link" type="button">Zaten hesabım var — Giriş Yap</button>
+        </div>
+
+        <div id="adminPanelLogin" class="auth-panel" hidden>
+            <input id="adminName" class="auth-input" type="text" maxlength="12" placeholder="Admin adı (1-12 karakter)">
+            <input id="adminPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="Admin şifresi (4 hane)">
+            <input id="adminCode" class="auth-input" type="text" maxlength="16" placeholder="Admin kodu">
+            <button id="adminLoginButton" class="auth-action admin-action" type="button">👑 ADMİN GİRİŞİ</button>
+            <button id="showLoginFromAdmin" class="auth-link" type="button">← Normal Giriş</button>
+        </div>
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+    </div>
+</div>
+
+<div id="userPanel" class="user-panel" hidden>
+    <button id="userPanelButton" class="user-panel-button" type="button">👤 KULLANICI PANELİ</button>
+    <div id="userPanelContent" class="user-panel-content" hidden>
+        <strong id="userPanelWelcome"></strong>
+        <p>İsim: <span id="currentUserName">-</span></p>
+        <p>Şifre: <span id="currentUserPassword">-</span></p>
+        <button id="logoutButton" type="button">Çıkış Yap</button>
+    </div>
+</div>
+
+<div id="adminDashboard" class="admin-dashboard" hidden>
+    <div class="admin-dashboard-box">
+        <div class="admin-dashboard-head">
+            <div><p class="small-title">👑 ADMİN</p><h2 id="adminWelcome">HOŞ GELDİN ADMİN</h2></div>
+            <button id="adminCloseDashboard" type="button">×</button>
+        </div>
+        <p class="admin-note">Kullanıcıların isim/şifre bilgilerini güncelleyebilir veya hesabı banlayabilirsin.</p>
+        <div id="adminUsersList" class="admin-users-list"></div>
+        <button id="adminLogout" class="auth-action" type="button">Admin Çıkışı</button>
+    </div>
+</div>
+
+<div id="accountNotice" class="account-notice" hidden></div>
+
 <main>
     <section id="anasayfa" class="hero">
         <div class="profile-circle">
@@ -236,6 +294,7 @@
                 <article id="lessonContent" class="lesson-content"></article>
                 <div id="exerciseBox" class="exercise-box"></div>
                 <p id="courseFeedback" class="course-feedback" aria-live="polite"></p>
+                <div id="lessonInfo" class="lesson-info" hidden></div>
             </div>
         </div>
     </div>

@@ -756,6 +756,33 @@ miniGamesModal?.addEventListener("click",e=>{if(e.target===miniGamesModal)closeM
 document.querySelectorAll(".mini-game-choice").forEach(btn=>btn.addEventListener("click",()=>showMiniGame(btn.dataset.miniGame)));
 document.querySelectorAll("[data-back-mini]").forEach(btn=>btn.addEventListener("click",showMiniGameMenu));
 
+// Mini oyun sesleri — harici dosya gerektirmez
+let miniAudioCtx=null;
+function playMiniGameSound(type){
+  try{
+    const C=window.AudioContext||window.webkitAudioContext; if(!C)return;
+    if(!miniAudioCtx) miniAudioCtx=new C();
+    if(miniAudioCtx.state==='suspended') miniAudioCtx.resume();
+    const now=miniAudioCtx.currentTime;
+    const notes={
+      click:[type==='click'?520:type==='start'?760:type==='count'?430:type==='finish'?180:300],
+      countdown:[type==='count'?520:300],
+      memory:[type==='match'?780:type==='wrong'?170:type==='flip'?420:type==='win'?920:320],
+      quiz:[type==='correct'?720:type==='wrong'?170:360]
+    };
+    const group=type==='click'||type==='start'||type==='count'||type==='finish'?'click':type==='match'||type==='wrong'||type==='flip'||type==='win'?'memory':'quiz';
+    const freq=notes[group][0];
+    const osc=miniAudioCtx.createOscillator(), gain=miniAudioCtx.createGain();
+    osc.type=(type==='wrong'||type==='finish')?'square':'sine';
+    osc.frequency.setValueAtTime(freq,now);
+    if(type==='win'||type==='correct') osc.frequency.exponentialRampToValueAtTime(freq*1.35,now+.16);
+    gain.gain.setValueAtTime(.0001,now);
+    gain.gain.exponentialRampToValueAtTime(.16,now+.015);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+(type==='win'||type==='correct'?.45:.18));
+    osc.connect(gain); gain.connect(miniAudioCtx.destination); osc.start(now); osc.stop(now+(type==='win'||type==='correct'?.46:.2));
+  }catch(e){}
+}
+
 // ---------------- TIKLAMA ŞAMPİYONU ----------------
 const clickGameTarget=document.getElementById("clickGameTarget");
 const clickGameScore=document.getElementById("clickGameScore");
@@ -791,7 +818,7 @@ function finishClickGame(){
   const cfg=clickDifficultyConfig[clickDifficulty];
   const xp=Math.min(cfg.xp,Math.max(5,Math.floor(clickCount/3)+5));
   if(clickGameTarget){clickGameTarget.disabled=false;clickGameTarget.textContent="TEKRAR OYNA";clickGameTarget.className="click-game-target "+cfg.targetClass;}
-  if(clickGameCountdown)clickGameCountdown.textContent="SÜRE BİTTİ!";
+  if(clickGameCountdown)clickGameCountdown.textContent="SÜRE BİTTİ!"; playMiniGameSound("finish");
   if(clickGameScore)clickGameScore.textContent=`🏆 ${clickCount} tıklama · ${clickTime} saniye · +${xp} XP`;
   addXP(xp,"Tıklama Şampiyonu");
 }
@@ -799,13 +826,14 @@ function startClickCountdown(){
   if(clickPhase!=="idle"&&clickPhase!=="finished")return;
   stopClickGame(); clickCount=0; clickPhase="countdown";
   clickGameTarget.disabled=true; clickGameTarget.textContent="BEKLE...";
+  playMiniGameSound("start");
   let n=3; clickGameCountdown.textContent=n;
   clickGameLive.textContent=`Hazırlan... · ${clickTime} sn`;
   clickCountdownTimer=setInterval(()=>{
     n--;
-    if(n>0){clickGameCountdown.textContent=n;return;}
+    if(n>0){clickGameCountdown.textContent=n;playMiniGameSound("count");return;}
     clearInterval(clickCountdownTimer);clickCountdownTimer=null;
-    clickGameCountdown.textContent="BAŞLA!";
+    clickGameCountdown.textContent="BAŞLA!"; playMiniGameSound("start");
     clickGameTarget.disabled=false; clickGameTarget.textContent="TIKLA!";
     clickPhase="playing";
     let remaining=clickTime;
@@ -820,6 +848,7 @@ function startClickCountdown(){
 clickGameTarget?.addEventListener("click",()=>{
   if(clickPhase==="playing"){
     clickCount++;
+    playMiniGameSound("click");
     clickGameLive.textContent=`${clickCount} tıklama · süre devam ediyor`;
     clickGameScore.textContent=`${clickCount} tıklama`;
   }else if(clickPhase==="idle"||clickPhase==="finished") startClickCountdown();
@@ -857,17 +886,19 @@ function buildMemoryGame(){
   memoryStatus.textContent=`0 / ${pairs} eşleşme`;
   memoryGame.querySelectorAll(".memory-card").forEach(btn=>btn.addEventListener("click",()=>{
     if(memoryLocked||btn.classList.contains("found")||memoryOpened.includes(btn))return;
-    btn.textContent=btn.dataset.v;btn.classList.add("open");memoryOpened.push(btn);
+    btn.textContent=btn.dataset.v;btn.classList.add("open");memoryOpened.push(btn); playMiniGameSound("flip");
     if(memoryOpened.length!==2)return;
     memoryLocked=true;
     const [a,b]=memoryOpened;
     if(a.dataset.v===b.dataset.v){
-      a.classList.add("found");b.classList.add("found");memoryFound++;memoryOpened=[];memoryLocked=false;
+      a.classList.add("found");b.classList.add("found");memoryFound++;memoryOpened=[];memoryLocked=false; playMiniGameSound("match");
       memoryStatus.textContent=`${memoryFound} / ${pairs} eşleşme`;
       if(memoryFound===pairs){
+        playMiniGameSound("win");
         const xp=memoryConfig[memoryDifficulty].xp;memoryStatus.textContent=`🎉 Tamamladın! +${xp} XP`;addXP(xp,"Hafıza Oyunu");memoryStartButton.textContent="Tekrar Oyna";
       }
     }else{
+      playMiniGameSound("wrong");
       setTimeout(()=>{a.textContent="?";b.textContent="?";a.classList.remove("open");b.classList.remove("open");memoryOpened=[];memoryLocked=false;memoryStatus.textContent=`${memoryFound} / ${pairs} eşleşme · Tekrar dene`;},700);
     }
   }));

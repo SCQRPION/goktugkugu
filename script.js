@@ -574,7 +574,9 @@ if (startCourse) {
     startCourse.addEventListener("click", () => {
         if (selectedLanguages.length === 0) return;
         activeLanguage = selectedLanguages[0];
-        lessonIndex = 0;
+        const resumeUser = currentRealUser();
+        const resumeProfile = resumeUser ? getProfile(resumeUser.name) : null;
+        lessonIndex = resumeProfile?.languages?.[activeLanguage]?.lesson || 0;
         courseSelection.hidden = true;
         courseLearning.hidden = false;
         renderTabs();
@@ -584,3 +586,167 @@ if (startCourse) {
 document.addEventListener("keydown", event => {
     if (event.key === "Escape") closeCourse();
 });
+
+// ----------------------------------------------------
+// GELİŞMİŞ PROFİL: XP, SEVİYE, ROZETLER, İLERLEME, SERİ
+// ----------------------------------------------------
+const PROFILE_KEY = "goktug_site_profiles_v1";
+const THEME_KEY = "goktug_site_theme_v1";
+const ANNOUNCE_KEY = "goktug_site_announcements_v1";
+
+function getProfiles(){ try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");}catch{return {};}}
+function saveProfiles(p){localStorage.setItem(PROFILE_KEY,JSON.stringify(p));}
+function getProfile(name){ const p=getProfiles(); if(!p[name]) p[name]={xp:0,completed:{},languages:{},badges:[],streak:1,lastLogin:"",noticeRead:0}; return p[name]; }
+function saveProfile(name,profile){const p=getProfiles();p[name]=profile;saveProfiles(p);}
+function levelFromXP(xp){return Math.floor(Number(xp||0)/100)+1;}
+function maybeAwardBadges(profile){
+  const total=Object.keys(profile.completed||{}).length;
+  const badges=profile.badges||[];
+  const add=(b)=>{if(!badges.includes(b))badges.push(b);};
+  if(total>=1)add("🥇 İlk dersi tamamladın");
+  if(total>=10)add("💻 İlk 10 ders");
+  if((profile.streak||0)>=3)add("🔥 3 gün üst üste giriş");
+  const finished=Object.values(profile.languages||{}).some(x=>x.completed);
+  if(finished)add("👑 Tüm kursu bitirdin");
+  profile.badges=badges;
+}
+function updateStreak(profile){
+  const today=new Date().toISOString().slice(0,10), last=profile.lastLogin;
+  if(!last){profile.streak=1;profile.lastLogin=today;return;}
+  if(last===today)return;
+  const d1=new Date(last), d2=new Date(today), diff=Math.round((d2-d1)/86400000);
+  profile.streak=diff===1?(profile.streak||1)+1:1; profile.lastLogin=today;
+}
+function currentRealUser(){const c=getCurrent(); return c&&!c.isAdmin?getUsers().find(u=>u.name===c.name):null;}
+function addXP(amount,reason=""){
+  const u=currentRealUser(); if(!u)return;
+  const p=getProfile(u.name); p.xp=(p.xp||0)+amount; maybeAwardBadges(p); saveProfile(u.name,p); updateUserPanel({name:u.name});
+  if(reason) showAccountNotice(`✨ +${amount} XP — ${reason}`);
+}
+
+function updateUserPanel(user){
+    const full=getUsers().find(u=>u.name===user.name);
+    const p=getProfile(user.name); updateStreak(p); maybeAwardBadges(p); saveProfile(user.name,p);
+    document.getElementById("userPanelWelcome").textContent=`HOŞ GELDİN ${user.name}`;
+    document.getElementById("currentUserName").textContent=full?.name||user.name;
+    document.getElementById("currentUserPassword").textContent=full?.password||"••••";
+    document.getElementById("currentUserLevel").textContent=levelFromXP(p.xp);
+    document.getElementById("currentUserXP").textContent=p.xp||0;
+    document.getElementById("currentUserStreak").textContent=`${p.streak||1} gün`;
+}
+
+// İlerleme paneli
+const progressPanel=document.getElementById("progressPanel"), progressClose=document.getElementById("progressClose"), progressContent=document.getElementById("progressDashboardContent"), openProgressButton=document.getElementById("openProgressButton");
+function renderProgressPanel(){
+  const u=currentRealUser(); if(!u||!progressContent)return;
+  const p=getProfile(u.name), totalLessons=Object.values(courseLanguages).reduce((a,l)=>a+l.lessons.length,0), done=Object.keys(p.completed||{}).length;
+  const langRows=Object.entries(p.languages||{}).map(([k,v])=>`<div class="progress-lang-row"><span>${courseLanguages[k]?.icon||"💻"} ${courseLanguages[k]?.name||k}</span><strong>${Math.min(v.done||0,courseLanguages[k]?.lessons.length||6)} / ${courseLanguages[k]?.lessons.length||6}</strong></div>`).join("")||'<p class="admin-empty">Henüz bir kurs başlamadın.</p>';
+  progressContent.innerHTML=`<div class="profile-big-stats"><div><strong>${levelFromXP(p.xp)}</strong><span>Seviye</span></div><div><strong>${p.xp||0}</strong><span>XP</span></div><div><strong>${p.streak||1}</strong><span>🔥 Gün Serisi</span></div></div><div class="profile-progress"><div><span>Genel ders ilerlemesi</span><b>${done}/${totalLessons}</b></div><div class="progress-bar"><div class="progress-fill" style="width:${totalLessons?Math.round(done/totalLessons*100):0}%"></div></div></div><h3>📚 Diller</h3>${langRows}<h3>🎖️ Rozetler</h3><div class="badge-list">${(p.badges||[]).map(b=>`<span>${b}</span>`).join("")||'<span>Henüz rozet yok.</span>'}</div>`;
+}
+openProgressButton?.addEventListener("click",()=>{renderProgressPanel();progressPanel.hidden=false;});
+progressClose?.addEventListener("click",()=>progressPanel.hidden=true);
+progressPanel?.addEventListener("click",e=>{if(e.target===progressPanel)progressPanel.hidden=true;});
+
+// Tema sistemi
+const themeButton=document.getElementById("themeButton"), themePanel=document.getElementById("themePanel");
+function applyTheme(theme){document.body.dataset.theme=theme||"dark";localStorage.setItem(THEME_KEY,theme||"dark");}
+applyTheme(localStorage.getItem(THEME_KEY)||"dark");
+themeButton?.addEventListener("click",()=>themePanel.hidden=!themePanel.hidden);
+themePanel?.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{applyTheme(b.dataset.theme);themePanel.hidden=true;}));
+
+// Kurs ilerlemesi ve XP: mevcut render/checkAnswer davranışını bozmadan tamamlanan dersleri kaydet
+const originalRenderLesson = renderLesson;
+renderLesson = function(){
+  originalRenderLesson();
+  const u=currentRealUser();
+  if(!u)return;
+  const p=getProfile(u.name), lang=courseLanguages[activeLanguage];
+  p.languages[activeLanguage]=p.languages[activeLanguage]||{done:0,completed:false};
+  const done=Object.keys(p.completed||{}).filter(k=>k.startsWith(activeLanguage+"_")).length;
+  p.languages[activeLanguage].done=done; p.languages[activeLanguage].completed=done>=lang.lessons.length; maybeAwardBadges(p); saveProfile(u.name,p);
+  updateUserPanel(u);
+};
+const originalCheckAnswer = checkAnswer;
+checkAnswer = function(input,answer){
+  if(!input)return;
+  const beforeKey=activeLanguage+"_"+lessonIndex;
+  const correct=normalizeAnswer(input.value)===normalizeAnswer(answer);
+  originalCheckAnswer(input,answer);
+  if(correct){
+    const u=currentRealUser();
+    if(u){const p=getProfile(u.name); if(!p.completed[beforeKey]){p.completed[beforeKey]=Date.now();p.xp=(p.xp||0)+25; maybeAwardBadges(p); saveProfile(u.name,p); updateUserPanel(u); showAccountNotice("✨ +25 XP — Ders tamamlandı!");}}
+  }
+};
+
+// Kaldığın yerden devam: seçilen dil ve ders localStorage'a yazılır
+const originalStartCourseListenerState = {patched:true};
+const originalAdvanceLesson = advanceLesson;
+advanceLesson = function(){
+  const lang=courseLanguages[activeLanguage];
+  if(lang && lessonIndex>=lang.lessons.length-1){ showFinalQuiz(); return; }
+  originalAdvanceLesson();
+  const u=currentRealUser(); if(!u||!activeLanguage)return;
+  const p=getProfile(u.name); p.languages[activeLanguage]=p.languages[activeLanguage]||{}; p.languages[activeLanguage].lesson=lessonIndex; p.languages[activeLanguage].done=Object.keys(p.completed||{}).filter(k=>k.startsWith(activeLanguage+"_")).length; p.languages[activeLanguage].completed=p.languages[activeLanguage].done>=courseLanguages[activeLanguage].lessons.length; maybeAwardBadges(p); saveProfile(u.name,p);
+};
+
+function showFinalQuiz(){
+  if(!lessonInfo)return;
+  const lang=courseLanguages[activeLanguage], qs=lang.lessons.slice(0,5), state={index:0,score:0};
+  lessonInfo.hidden=false;
+  const draw=()=>{
+    if(state.index>=qs.length){
+      const passed=state.score>=4;
+      if(passed){ const u=currentRealUser(); if(u){const p=getProfile(u.name);p.languages[activeLanguage]={done:lang.lessons.length,lesson:0,completed:true};maybeAwardBadges(p);saveProfile(u.name,p);updateUserPanel(u);} }
+      lessonInfo.innerHTML=`<div class="final-quiz"><h3>🎉 ${lang.name} Mini Sınavı Bitti!</h3><p>Sonuç: <strong>${state.score} / 5</strong></p><p>${passed?"👑 Başarılı! Bu dilin başlangıç kursunu tamamladın.":"🔁 4 doğruya ulaşınca kurs tamamlanır. İstersen tekrar dene."}</p><button id="quizRetry" class="lesson-info button" type="button">🔄 Tekrar Dene</button></div>`;
+      lessonInfo.querySelector("#quizRetry")?.addEventListener("click",()=>{state.index=0;state.score=0;draw();}); return;
+    }
+    const q=qs[state.index];
+    const opts=[q.answer,"bilmiyorum","yanlış cevap"].sort(()=>Math.random()-.5);
+    lessonInfo.innerHTML=`<div class="final-quiz"><p class="small-title">📝 MİNİ SINAV</p><h3>${lang.name} — Soru ${state.index+1}/5</h3><p>${q.question}</p>${opts.map(o=>`<button type="button" class="quiz-option" data-answer="${o.replace(/"/g,"&quot;")}">${o}</button>`).join("")}<div class="quiz-result">Puan: ${state.score}/5</div></div>`;
+    lessonInfo.querySelectorAll(".quiz-option").forEach(btn=>btn.addEventListener("click",()=>{if(normalizeAnswer(btn.dataset.answer)===normalizeAnswer(q.answer)){state.score++;playCourseSound("correct");}else playCourseSound("wrong");state.index++;draw();}));
+  }; draw();
+}
+
+
+// Duyurular
+function getAnnouncements(){try{return JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||"[]");}catch{return [];}}
+function showLatestAnnouncement(){const a=getAnnouncements()[0];if(a)showAccountNotice(`📢 ${a.text}`);}
+window.addEventListener("load",()=>{if(currentRealUser())showLatestAnnouncement();});
+
+// ----------------------------------------------------
+// MİNİ OYUNLAR
+// ----------------------------------------------------
+const clickGameButton=document.getElementById("clickGameButton"), clickGameScore=document.getElementById("clickGameScore");
+let clickCount=0, clickTimer=null;
+clickGameButton?.addEventListener("click",()=>{
+  if(clickTimer)return; clickCount=0; clickGameButton.textContent="TIKLA!"; clickGameButton.classList.add("game-active");
+  const start=Date.now(); const handler=()=>{clickCount++;clickGameScore.textContent=`${clickCount} tıklama`}; clickGameButton.addEventListener("click",handler);
+  clickTimer=setTimeout(()=>{clickGameButton.removeEventListener("click",handler);clickGameButton.textContent="Oyunu Başlat";clickGameButton.classList.remove("game-active");clickGameScore.textContent=`🏆 ${clickCount} tıklama / 10 sn`; addXP(Math.min(50,clickCount),"Tıklama oyunu");clickTimer=null;},10000);
+});
+
+const memoryGame=document.getElementById("memoryGame"), memoryStatus=document.getElementById("memoryGameStatus");
+if(memoryGame){
+  const vals=["🚀","🚀","💻","💻"]; let opened=[];
+  memoryGame.innerHTML=vals.map((v,i)=>`<button type="button" class="memory-card" data-i="${i}" data-v="${v}">?</button>`).join("");
+  memoryGame.querySelectorAll("button").forEach(btn=>btn.addEventListener("click",()=>{
+    if(btn.classList.contains("found")||opened.length>=2)return; btn.textContent=btn.dataset.v;opened.push(btn); if(opened.length===2){if(opened[0].dataset.v===opened[1].dataset.v){opened.forEach(x=>x.classList.add("found"));memoryStatus.textContent="🎉 Eşleşme!";addXP(20,"Hafıza oyunu");opened=[];}else{setTimeout(()=>{opened.forEach(x=>x.textContent="?");opened=[];memoryStatus.textContent="Tekrar dene!";},650);}};
+  }));
+}
+
+const miniQuizButton=document.getElementById("miniQuizButton"), miniQuizQuestion=document.getElementById("miniQuizQuestion"), miniQuizScore=document.getElementById("miniQuizScore");
+const miniQuestions=[{q:"HTML'de başlık etiketi?",a:"h1"},{q:"CSS'te yazı rengi?",a:"color"},{q:"JavaScript değişken anahtar kelimesi?",a:"let"},{q:"Python'da ekrana yazdırma?",a:"print"},{q:"SQL'de veri seçme komutu?",a:"select"}]; let mqIndex=0,mqScore=0;
+miniQuizButton?.addEventListener("click",()=>{if(mqIndex>=miniQuestions.length){mqIndex=0;mqScore=0;} const q=miniQuestions[mqIndex]; const answer=prompt(q.q); if(answer&&normalizeAnswer(answer)===q.a){mqScore+=20;miniQuizScore.textContent=`${mqScore} puan`;addXP(10,"Mini quiz doğru cevap");}else{miniQuizScore.textContent=`${mqScore} puan — yanlış`; } mqIndex++; miniQuizQuestion.textContent=mqIndex<miniQuestions.length?`Sıradaki soru: ${miniQuestions[mqIndex].q}`:"🎉 Quiz bitti!";});
+
+// ----------------------------------------------------
+// ADMİN: XP / ilerleme / duyuru
+// ----------------------------------------------------
+const oldRenderAdminUsers=renderAdminUsers;
+renderAdminUsers=function(){
+  oldRenderAdminUsers();
+  const list=document.getElementById("adminUsersList"); if(!list)return;
+  getUsers().forEach((u,i)=>{const row=list.querySelector(`[data-index="${i}"]`); if(!row)return; const p=getProfile(u.name); const extra=document.createElement("div"); extra.className="admin-user-stats"; extra.innerHTML=`✨ ${p.xp||0} XP · Seviye ${levelFromXP(p.xp)} · 🔥 ${p.streak||1} gün · 🎖️ ${(p.badges||[]).length} rozet`; row.appendChild(extra);});
+};
+
+// Admin paneline duyuru kutusu ekle
+const adminBox=document.querySelector(".admin-dashboard-box");
+if(adminBox){const wrap=document.createElement("div");wrap.className="admin-announcement-box";wrap.innerHTML='<h3>📢 Site Duyurusu</h3><div class="admin-announce-row"><input id="adminAnnouncementInput" maxlength="180" placeholder="Kullanıcılara gönderilecek mesaj..."><button id="adminAnnouncementButton" type="button">Duyuru Gönder</button></div>'; const logout=adminBox.querySelector("#adminLogout"); adminBox.insertBefore(wrap,logout); wrap.querySelector("button").addEventListener("click",()=>{const input=document.getElementById("adminAnnouncementInput");const text=input.value.trim();if(!text)return;const arr=getAnnouncements();arr.unshift({text,at:Date.now()});localStorage.setItem(ANNOUNCE_KEY,JSON.stringify(arr.slice(0,20)));input.value="";showAccountNotice("📢 Duyuru gönderildi.");});}

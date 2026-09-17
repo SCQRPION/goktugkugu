@@ -59,6 +59,12 @@
         <strong id="userPanelWelcome"></strong>
         <p>İsim: <span id="currentUserName">-</span></p>
         <p>Şifre: <span id="currentUserPassword">-</span></p>
+        <div class="user-stats-mini">
+            <p>🏆 Seviye: <span id="currentUserLevel">1</span></p>
+            <p>✨ XP: <span id="currentUserXP">0</span></p>
+            <p>🔥 Seri: <span id="currentUserStreak">1 gün</span></p>
+        </div>
+        <button id="openProgressButton" type="button">📊 İlerlemem</button>
         <button id="logoutButton" type="button">Çıkış Yap</button>
     </div>
 </div>
@@ -77,6 +83,22 @@
 
 <div id="accountNotice" class="account-notice" hidden></div>
 
+<div id="progressPanel" class="feature-modal" hidden>
+  <div class="feature-modal-box progress-dashboard-box">
+    <button id="progressClose" class="feature-close" type="button">×</button>
+    <p class="small-title">📊 KULLANICI İLERLEMESİ</p>
+    <h2>Profilim</h2>
+    <div id="progressDashboardContent"></div>
+  </div>
+</div>
+
+<div id="themePanel" class="theme-panel" hidden>
+  <strong>🎨 Tema</strong>
+  <button type="button" data-theme="dark">🌑 Karanlık</button>
+  <button type="button" data-theme="light">☀️ Aydınlık</button>
+  <button type="button" data-theme="neon">🌌 Neon</button>
+</div>
+
 <main>
     <section id="anasayfa" class="hero">
         <div class="profile-circle">
@@ -92,6 +114,7 @@
         <div class="hero-buttons">
             <a href="#oyunlar" class="btn primary">Oyunlarımı Gör</a>
             <a href="https://github.com/SCQRPION" target="_blank" rel="noopener noreferrer" class="btn secondary">GitHub'ım</a>
+            <button id="themeButton" class="btn secondary" type="button">🎨 Tema</button>
         </div>
     </section>
 
@@ -234,6 +257,32 @@
         </div>
     </section>
 
+    <section id="oyunlar-mini" class="section mini-games-section">
+        <p class="small-title">🎮 MİNİ OYUNLAR</p>
+        <h2>Kısa Eğlence Alanı</h2>
+        <p class="section-description">Ders arasında mini oyunlarla puan topla.</p>
+        <div class="mini-game-grid">
+            <article class="mini-game-card">
+                <div class="mini-game-icon">🖱️</div><h3>Tıklama Şampiyonu</h3>
+                <p>10 saniyede kaç kez tıklayabilirsin?</p>
+                <button id="clickGameButton" class="game-button" type="button">Oyunu Başlat</button>
+                <strong id="clickGameScore">Hazır</strong>
+            </article>
+            <article class="mini-game-card">
+                <div class="mini-game-icon">🧠</div><h3>Hafıza Oyunu</h3>
+                <p>4 kutudaki eşleşmeyi bul.</p>
+                <div id="memoryGame" class="memory-grid"></div>
+                <strong id="memoryGameStatus">Başlatmak için bir kutuya tıkla</strong>
+            </article>
+            <article class="mini-game-card">
+                <div class="mini-game-icon">💻</div><h3>Kodlama Quiz'i</h3>
+                <p id="miniQuizQuestion">Hazır olduğunda başlat.</p>
+                <button id="miniQuizButton" class="game-button" type="button">Quiz'i Başlat</button>
+                <strong id="miniQuizScore">0 puan</strong>
+            </article>
+        </div>
+    </section>
+
     <section id="iletisim" class="section contact-section">
         <p class="small-title">İLETİŞİM</p>
         <h2>Bana Buradan Ulaşabilirsiniz</h2>
@@ -273,7 +322,7 @@
             <div id="courseSelection" class="course-view">
                 <p class="small-title">🎓 ÜCRETSİZ KURS</p>
                 <h2 id="courseTitle">Hangi yazılım dilini öğrenmek istiyorsun?</h2>
-                <p class="course-note">En fazla <strong>2 dil</strong> seçebilirsin. Seçimini yaptıktan sonra kurs başlayacak.</p>
+                <p class="course-note">En fazla <strong>2 dil</strong> seçebilirsin. Daha önce başladıysan kaldığın bölüm otomatik açılır.</p>
                 <div id="languageGrid" class="language-grid"></div>
                 <p id="selectionCount" class="selection-count">0 / 2 dil seçildi</p>
                 <button id="startCourse" class="course-start" type="button" disabled>🚀 KURSA BAŞLA</button>

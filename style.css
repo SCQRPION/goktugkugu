@@ -803,3 +803,59 @@ body.auth-locked { overflow: hidden; }
 .lesson-info-icon { font-size:2rem; } .lesson-info strong { font-size:1.15rem; } .lesson-info p { color:#c7f9dc; margin-top:4px; }
 .lesson-info button { border:0; border-radius:10px; padding:11px 14px; background:#16a05a; color:white; font-weight:900; cursor:pointer; }
 @media(max-width:700px){ .auth-box{padding:25px 18px}.user-panel{top:70px;left:10px}.admin-user-row{grid-template-columns:1fr 1fr}.admin-user-row>div{grid-column:1/-1}.lesson-info{grid-template-columns:1fr}.lesson-info button{width:100%} }
+
+
+/* ----------------------------------------------------
+   YENİ ÖZELLİKLER: XP / ROZET / TEMA / İLERLEME / OYUNLAR
+---------------------------------------------------- */
+.user-stats-mini { margin:12px 0; padding:10px; border-radius:12px; background:rgba(74,222,128,.07); border:1px solid rgba(134,239,172,.12); }
+.user-stats-mini p { margin:5px 0 !important; }
+#openProgressButton { margin-top:8px; border:0; border-radius:9px; padding:9px 12px; background:#2563eb; color:white; font-weight:800; cursor:pointer; }
+.feature-modal { position:fixed; inset:0; z-index:45000; background:rgba(0,0,0,.82); display:flex; align-items:center; justify-content:center; padding:20px; }
+.feature-modal[hidden], .theme-panel[hidden] { display:none !important; }
+.feature-modal-box { width:min(760px,100%); max-height:90vh; overflow:auto; padding:30px; border-radius:24px; background:#07170e; border:1px solid rgba(74,222,128,.28); box-shadow:0 30px 100px rgba(0,0,0,.7); position:relative; }
+.feature-close { position:absolute; right:18px; top:18px; width:40px; height:40px; border:0; border-radius:50%; background:rgba(255,255,255,.08); color:white; font-size:26px; cursor:pointer; }
+.profile-big-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }
+.profile-big-stats > div { padding:18px; border-radius:16px; background:rgba(22,160,90,.12); border:1px solid rgba(134,239,172,.14); text-align:center; }
+.profile-big-stats strong { display:block; font-size:1.7rem; color:#86efac; }
+.profile-big-stats span { color:#c7f9dc; font-size:.85rem; }
+.profile-progress { margin:20px 0; }
+.profile-progress > div:first-child { display:flex; justify-content:space-between; margin-bottom:8px; color:#c7f9dc; }
+.progress-lang-row { display:flex; justify-content:space-between; padding:12px 14px; margin:8px 0; border-radius:12px; background:rgba(255,255,255,.04); }
+.badge-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.badge-list span { padding:8px 11px; border-radius:999px; background:rgba(74,222,128,.12); border:1px solid rgba(74,222,128,.2); color:#a7f3d0; }
+.theme-panel { position:fixed; top:82px; right:18px; z-index:3000; display:grid; gap:7px; width:180px; padding:13px; border-radius:15px; background:#07170e; border:1px solid rgba(74,222,128,.25); box-shadow:0 20px 50px rgba(0,0,0,.4); }
+.theme-panel strong { padding:3px 5px; }
+.theme-panel button { border:0; border-radius:9px; padding:9px; background:rgba(255,255,255,.06); color:white; cursor:pointer; text-align:left; font-weight:800; }
+.theme-panel button:hover { background:rgba(74,222,128,.15); }
+body[data-theme="light"] { background:#eef7f1; color:#102218; }
+body[data-theme="light"] .navbar { background:rgba(245,255,248,.9); }
+body[data-theme="light"] .section, body[data-theme="light"] .hero { color:#102218; }
+body[data-theme="light"] .section-description, body[data-theme="light"] .about-lead, body[data-theme="light"] .hero-text { color:#365444; }
+body[data-theme="light"] .game-card, body[data-theme="light"] .service-card, body[data-theme="light"] .contact-card { background:#fff; color:#102218; }
+body[data-theme="light"] .small-title { color:#15803d; }
+body[data-theme="neon"] { background:#07001a; }
+body[data-theme="neon"] .navbar { background:rgba(15,0,35,.88); }
+body[data-theme="neon"] .section, body[data-theme="neon"] .hero { filter:saturate(1.3); }
+body[data-theme="neon"] .game-card:hover, body[data-theme="neon"] .service-card:hover { box-shadow:0 0 30px rgba(168,85,247,.25); border-color:rgba(168,85,247,.5); }
+
+.mini-game-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:25px; }
+.mini-game-card { padding:22px; border-radius:18px; background:rgba(13,35,24,.76); border:1px solid rgba(134,239,172,.13); text-align:center; }
+.mini-game-icon { font-size:2.3rem; }
+.mini-game-card p { color:#a7f3d0; min-height:45px; }
+.mini-game-card strong { display:block; margin-top:12px; color:#86efac; }
+.game-active { transform:scale(1.03); box-shadow:0 0 30px rgba(74,222,128,.35); }
+.memory-grid { display:grid; grid-template-columns:repeat(2,60px); gap:8px; justify-content:center; margin:14px auto; }
+.memory-card { width:60px; height:60px; border:1px solid rgba(134,239,172,.2); border-radius:10px; background:#06120d; color:white; font-size:1.5rem; cursor:pointer; }
+.memory-card.found { background:#166534; }
+.admin-user-stats { grid-column:1/-1; color:#86efac; font-size:.82rem; }
+.admin-announcement-box { margin:18px 0; padding:16px; border-radius:15px; background:rgba(124,58,237,.09); border:1px solid rgba(196,181,253,.2); }
+.admin-announcement-box h3 { margin-bottom:10px; }
+.admin-announce-row { display:flex; gap:8px; }
+.admin-announce-row input { flex:1; min-width:0; padding:11px; border-radius:9px; border:1px solid rgba(134,239,172,.18); background:#06120d; color:white; }
+.admin-announce-row button { border:0; border-radius:9px; padding:10px 14px; background:#7c3aed; color:white; font-weight:800; cursor:pointer; }
+.final-quiz { margin-top:16px; padding:20px; border-radius:16px; background:rgba(22,160,90,.1); border:1px solid rgba(74,222,128,.2); }
+.quiz-option { display:block; width:100%; margin:8px 0; padding:11px 13px; border:1px solid rgba(134,239,172,.15); border-radius:10px; background:rgba(255,255,255,.04); color:white; cursor:pointer; text-align:left; }
+.quiz-option:hover { background:rgba(74,222,128,.12); }
+.quiz-result { margin-top:12px; font-weight:900; }
+@media(max-width:800px){ .mini-game-grid{grid-template-columns:1fr}.profile-big-stats{grid-template-columns:1fr}.admin-announce-row{flex-direction:column} }

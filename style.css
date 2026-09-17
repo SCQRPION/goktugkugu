@@ -544,3 +544,219 @@ footer {
 .youtube-link{display:inline-block;margin-top:16px;color:#86efac;font-weight:700;text-decoration:none}
 .youtube-link:hover{text-decoration:underline}
 @media(max-width:600px){.music-modal{padding:12px}.music-modal-box{padding:22px 14px 18px}}
+
+/* ----------------------------------------------------
+   ÜCRETSİZ YAZILIM KURSU
+---------------------------------------------------- */
+.course-cta {
+    margin-top: 30px;
+}
+
+.course-button {
+    width: 100%;
+    min-height: 88px;
+    padding: 18px 28px;
+    border: 1px solid rgba(134, 239, 172, 0.35);
+    border-radius: 20px;
+    background: linear-gradient(135deg, #0b7a43, #16a05a);
+    color: #fff;
+    font-size: clamp(1rem, 2.4vw, 1.45rem);
+    font-weight: 900;
+    letter-spacing: .4px;
+    cursor: pointer;
+    box-shadow: 0 15px 35px rgba(16, 185, 129, .18);
+    transition: transform .2s, filter .2s, box-shadow .2s;
+}
+
+.course-button:hover {
+    transform: translateY(-4px);
+    filter: brightness(1.08);
+    box-shadow: 0 20px 45px rgba(16, 185, 129, .28);
+}
+
+.course-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, .82);
+}
+
+.course-modal.open { display: flex; }
+
+.course-box {
+    position: relative;
+    width: min(920px, 100%);
+    max-height: 92vh;
+    overflow: auto;
+    padding: 34px;
+    border-radius: 26px;
+    background: linear-gradient(145deg, #091b12, #06120d);
+    border: 1px solid rgba(74, 222, 128, .3);
+    box-shadow: 0 30px 100px rgba(0,0,0,.6);
+}
+
+.course-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.course-note, .selection-count { color: #a7f3d0; }
+.course-note { margin: 8px 0 24px; }
+
+.language-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.language-option {
+    position: relative;
+}
+
+.language-option input {
+    position: absolute;
+    opacity: 0;
+}
+
+.language-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 105px;
+    padding: 15px 10px;
+    border-radius: 17px;
+    background: rgba(13, 35, 24, .82);
+    border: 1px solid rgba(134, 239, 172, .14);
+    cursor: pointer;
+    text-align: center;
+    transition: .2s;
+}
+
+.language-option label:hover,
+.language-option input:checked + label {
+    transform: translateY(-3px);
+    border-color: #4ade80;
+    background: rgba(22, 160, 90, .18);
+    box-shadow: 0 10px 25px rgba(74,222,128,.12);
+}
+
+.language-logo { font-size: 2rem; margin-bottom: 6px; }
+.language-name { font-weight: 900; }
+.language-level { font-size: .75rem; color: #86efac; margin-top: 3px; }
+.selection-count { margin: 17px 0; font-weight: 800; }
+
+.course-start {
+    width: 100%;
+    min-height: 58px;
+    border: 0;
+    border-radius: 14px;
+    background: #16a05a;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.course-start:disabled { opacity: .4; cursor: not-allowed; }
+
+.course-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-right: 45px;
+}
+
+.language-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.language-tab {
+    padding: 8px 12px;
+    border: 1px solid rgba(134,239,172,.18);
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    color: #a7f3d0;
+    cursor: pointer;
+}
+.language-tab.active { background: #16a05a; color: #fff; border-color: #4ade80; }
+
+.progress-wrap { margin: 20px 0 24px; }
+.progress-info { display: flex; justify-content: space-between; color: #a7f3d0; font-size: .9rem; margin-bottom: 7px; }
+.progress-bar { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+.progress-fill { height: 100%; width: 0; border-radius: inherit; background: #4ade80; transition: width .3s ease; }
+
+.lesson-content, .exercise-box {
+    padding: 24px;
+    border-radius: 19px;
+    background: rgba(13, 35, 24, .76);
+    border: 1px solid rgba(134,239,172,.13);
+}
+
+.lesson-content { margin-bottom: 16px; }
+.lesson-content h3 { margin-bottom: 12px; font-size: 1.4rem; }
+.lesson-content p { color: #c7f9dc; margin-bottom: 12px; }
+.lesson-content code {
+    display: block;
+    padding: 15px;
+    border-radius: 12px;
+    background: #030b07;
+    color: #86efac;
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+}
+
+.exercise-title { font-weight: 900; margin-bottom: 13px; }
+.exercise-question { color: #c7f9dc; margin-bottom: 14px; }
+.exercise-input {
+    width: 100%;
+    padding: 13px 15px;
+    border-radius: 11px;
+    border: 1px solid rgba(134,239,172,.2);
+    background: #06120d;
+    color: #fff;
+    outline: none;
+}
+.exercise-input:focus { border-color: #4ade80; }
+.exercise-check {
+    margin-top: 12px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 11px;
+    background: #16a05a;
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+}
+.course-feedback { min-height: 28px; margin-top: 13px; font-weight: 900; text-align: center; }
+
+.course-box.course-correct { animation: courseGreen 3s ease; }
+.course-box.course-wrong { animation: courseRedShake 3s ease; }
+@keyframes courseGreen {
+    0%,100% { box-shadow: 0 30px 100px rgba(0,0,0,.6); }
+    20%,80% { box-shadow: 0 0 55px rgba(34,197,94,.85); }
+}
+@keyframes courseRedShake {
+    0%,100% { transform: translateX(0); box-shadow: 0 30px 100px rgba(0,0,0,.6); }
+    10%,30%,50%,70%,90% { transform: translateX(-9px); box-shadow: 0 0 55px rgba(239,68,68,.8); }
+    20%,40%,60%,80% { transform: translateX(9px); }
+}
+
+@media (max-width: 700px) {
+    .course-box { padding: 25px 16px; }
+    .language-grid { grid-template-columns: repeat(2, 1fr); }
+    .course-topbar { display: block; padding-right: 35px; }
+    .language-tabs { margin-top: 14px; }
+    .lesson-content, .exercise-box { padding: 18px; }
+}

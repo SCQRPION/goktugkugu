@@ -168,6 +168,12 @@
                 </p>
             </article>
         </div>
+
+        <div class="course-cta">
+            <button id="courseButton" class="course-button" type="button">
+                🎓 İSTEDİĞİN DİLİ BAŞLANGIÇ SEVİYESİNDEN EN SONUNA KADAR ÖĞREN
+            </button>
+        </div>
     </section>
 
     <section id="iletisim" class="section contact-section">
@@ -201,6 +207,39 @@
         </a>
     </section>
 </main>
+
+    <div id="courseModal" class="course-modal" aria-hidden="true">
+        <div class="course-box" role="dialog" aria-modal="true" aria-labelledby="courseTitle">
+            <button id="courseClose" class="course-close" type="button" aria-label="Kapat">×</button>
+
+            <div id="courseSelection" class="course-view">
+                <p class="small-title">🎓 ÜCRETSİZ KURS</p>
+                <h2 id="courseTitle">Hangi yazılım dilini öğrenmek istiyorsun?</h2>
+                <p class="course-note">En fazla <strong>2 dil</strong> seçebilirsin. Seçimini yaptıktan sonra kurs başlayacak.</p>
+                <div id="languageGrid" class="language-grid"></div>
+                <p id="selectionCount" class="selection-count">0 / 2 dil seçildi</p>
+                <button id="startCourse" class="course-start" type="button" disabled>🚀 KURSA BAŞLA</button>
+            </div>
+
+            <div id="courseLearning" class="course-view" hidden>
+                <div class="course-topbar">
+                    <div>
+                        <p class="small-title">KURS</p>
+                        <h2 id="learningTitle">Ders</h2>
+                    </div>
+                    <div id="languageTabs" class="language-tabs"></div>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-info"><span id="lessonProgressText">Ders 1</span><span id="lessonProgressPercent">0%</span></div>
+                    <div class="progress-bar"><div id="lessonProgress" class="progress-fill"></div></div>
+                </div>
+                <article id="lessonContent" class="lesson-content"></article>
+                <div id="exerciseBox" class="exercise-box"></div>
+                <p id="courseFeedback" class="course-feedback" aria-live="polite"></p>
+            </div>
+        </div>
+    </div>
+
     <div id="musicModal" class="music-modal" aria-hidden="true">
         <div class="music-modal-box" role="dialog" aria-modal="true" aria-labelledby="musicModalTitle">
             <button id="musicClose" class="music-close" type="button" aria-label="Kapat">×</button>

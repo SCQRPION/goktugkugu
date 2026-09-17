@@ -114,3 +114,35 @@ if (continueButton && servicesSection) {
         });
     });
 }
+
+// Hizmet kutuları -> YouTube müzik
+const musicModal=document.getElementById("musicModal");
+const musicClose=document.getElementById("musicClose");
+const youtubePlayer=document.getElementById("youtubePlayer");
+const serviceCards=document.querySelectorAll(".service-card");
+const youtubeMusicUrl="https://www.youtube.com/embed/wyynWNptkDQ?autoplay=1&playsinline=1&rel=0&start=45&end=70";
+
+function openMusic(){
+    if(!musicModal||!youtubePlayer)return;
+    youtubePlayer.src=youtubeMusicUrl;
+    musicModal.classList.add("open");
+    musicModal.setAttribute("aria-hidden","false");
+}
+function closeMusic(){
+    if(!musicModal||!youtubePlayer)return;
+    musicModal.classList.remove("open");
+    musicModal.setAttribute("aria-hidden","true");
+    youtubePlayer.src="";
+}
+serviceCards.forEach(card=>{
+    card.style.cursor="pointer";
+    card.setAttribute("tabindex","0");
+    card.setAttribute("role","button");
+    card.addEventListener("click",openMusic);
+    card.addEventListener("keydown",e=>{
+        if(e.key==="Enter"||e.key===" "){e.preventDefault();openMusic();}
+    });
+});
+if(musicClose)musicClose.addEventListener("click",closeMusic);
+if(musicModal)musicModal.addEventListener("click",e=>{if(e.target===musicModal)closeMusic();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMusic();});

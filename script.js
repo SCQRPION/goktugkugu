@@ -714,28 +714,267 @@ function showLatestAnnouncement(){const a=getAnnouncements()[0];if(a)showAccount
 window.addEventListener("load",()=>{if(currentRealUser())showLatestAnnouncement();});
 
 // ----------------------------------------------------
-// MİNİ OYUNLAR
+// MİNİ OYUNLAR — ayrı ekran + zorluk + seçimler
 // ----------------------------------------------------
-const clickGameButton=document.getElementById("clickGameButton"), clickGameScore=document.getElementById("clickGameScore");
-let clickCount=0, clickTimer=null;
-clickGameButton?.addEventListener("click",()=>{
-  if(clickTimer)return; clickCount=0; clickGameButton.textContent="TIKLA!"; clickGameButton.classList.add("game-active");
-  const start=Date.now(); const handler=()=>{clickCount++;clickGameScore.textContent=`${clickCount} tıklama`}; clickGameButton.addEventListener("click",handler);
-  clickTimer=setTimeout(()=>{clickGameButton.removeEventListener("click",handler);clickGameButton.textContent="Oyunu Başlat";clickGameButton.classList.remove("game-active");clickGameScore.textContent=`🏆 ${clickCount} tıklama / 10 sn`; addXP(Math.min(50,clickCount),"Tıklama oyunu");clickTimer=null;},10000);
-});
+const miniGamesModal = document.getElementById("miniGamesModal");
+const miniGamesMenu = document.getElementById("miniGamesMenu");
+const miniGamesClose = document.getElementById("miniGamesClose");
+const miniGameScreens = {
+  click: document.getElementById("clickGameScreen"),
+  memory: document.getElementById("memoryGameScreen"),
+  quiz: document.getElementById("quizGameScreen")
+};
 
-const memoryGame=document.getElementById("memoryGame"), memoryStatus=document.getElementById("memoryGameStatus");
-if(memoryGame){
-  const vals=["🚀","🚀","💻","💻"]; let opened=[];
-  memoryGame.innerHTML=vals.map((v,i)=>`<button type="button" class="memory-card" data-i="${i}" data-v="${v}">?</button>`).join("");
-  memoryGame.querySelectorAll("button").forEach(btn=>btn.addEventListener("click",()=>{
-    if(btn.classList.contains("found")||opened.length>=2)return; btn.textContent=btn.dataset.v;opened.push(btn); if(opened.length===2){if(opened[0].dataset.v===opened[1].dataset.v){opened.forEach(x=>x.classList.add("found"));memoryStatus.textContent="🎉 Eşleşme!";addXP(20,"Hafıza oyunu");opened=[];}else{setTimeout(()=>{opened.forEach(x=>x.textContent="?");opened=[];memoryStatus.textContent="Tekrar dene!";},650);}};
-  }));
+function openMiniGames(){
+  if(!miniGamesModal)return;
+  miniGamesModal.hidden=false;
+  miniGamesModal.setAttribute("aria-hidden","false");
+  showMiniGameMenu();
+}
+function closeMiniGames(){
+  if(!miniGamesModal)return;
+  stopClickGame();
+  miniGamesModal.hidden=true;
+  miniGamesModal.setAttribute("aria-hidden","true");
+}
+function showMiniGameMenu(){
+  if(typeof stopClickGame === "function") stopClickGame();
+  miniGamesMenu.hidden=false;
+  Object.values(miniGameScreens).forEach(s=>{if(s)s.hidden=true;});
+}
+function showMiniGame(name){
+  miniGamesMenu.hidden=true;
+  Object.entries(miniGameScreens).forEach(([key,s])=>{if(s)s.hidden=key!==name;});
+  if(name==="click") resetClickGame();
+  if(name==="memory") resetMemoryGame();
+  if(name==="quiz") resetMiniQuiz();
 }
 
-const miniQuizButton=document.getElementById("miniQuizButton"), miniQuizQuestion=document.getElementById("miniQuizQuestion"), miniQuizScore=document.getElementById("miniQuizScore");
-const miniQuestions=[{q:"HTML'de başlık etiketi?",a:"h1"},{q:"CSS'te yazı rengi?",a:"color"},{q:"JavaScript değişken anahtar kelimesi?",a:"let"},{q:"Python'da ekrana yazdırma?",a:"print"},{q:"SQL'de veri seçme komutu?",a:"select"}]; let mqIndex=0,mqScore=0;
-miniQuizButton?.addEventListener("click",()=>{if(mqIndex>=miniQuestions.length){mqIndex=0;mqScore=0;} const q=miniQuestions[mqIndex]; const answer=prompt(q.q); if(answer&&normalizeAnswer(answer)===q.a){mqScore+=20;miniQuizScore.textContent=`${mqScore} puan`;addXP(10,"Mini quiz doğru cevap");}else{miniQuizScore.textContent=`${mqScore} puan — yanlış`; } mqIndex++; miniQuizQuestion.textContent=mqIndex<miniQuestions.length?`Sıradaki soru: ${miniQuestions[mqIndex].q}`:"🎉 Quiz bitti!";});
+document.getElementById("openMiniGamesButton")?.addEventListener("click",openMiniGames);
+miniGamesClose?.addEventListener("click",closeMiniGames);
+miniGamesModal?.addEventListener("click",e=>{if(e.target===miniGamesModal)closeMiniGames();});
+document.querySelectorAll(".mini-game-choice").forEach(btn=>btn.addEventListener("click",()=>showMiniGame(btn.dataset.miniGame)));
+document.querySelectorAll("[data-back-mini]").forEach(btn=>btn.addEventListener("click",showMiniGameMenu));
+
+// ---------------- TIKLAMA ŞAMPİYONU ----------------
+const clickGameTarget=document.getElementById("clickGameTarget");
+const clickGameScore=document.getElementById("clickGameScore");
+const clickGameCountdown=document.getElementById("clickGameCountdown");
+const clickGameLive=document.getElementById("clickGameLive");
+let clickDifficulty="easy", clickTime=10, clickCount=0, clickTimer=null, clickCountdownTimer=null, clickPhase="idle";
+
+const clickDifficultyConfig={
+  easy:{label:"Kolay",targetClass:"click-target-easy",xp:20},
+  medium:{label:"Orta",targetClass:"click-target-medium",xp:35},
+  hard:{label:"Zor",targetClass:"click-target-hard",xp:55}
+};
+function setActiveButtons(group,value){
+  document.querySelectorAll(`[data-difficulty-group="${group}"] button`).forEach(b=>b.classList.toggle("selected",b.dataset.difficulty===value));
+}
+function resetClickGame(){
+  stopClickGame(); clickCount=0; clickPhase="idle";
+  if(clickGameTarget){clickGameTarget.disabled=false;clickGameTarget.textContent="BAŞLAT";clickGameTarget.className="click-game-target "+clickDifficultyConfig[clickDifficulty].targetClass;}
+  if(clickGameCountdown)clickGameCountdown.textContent="HAZIR";
+  if(clickGameLive)clickGameLive.textContent=`0 tıklama · ${clickTime} sn`;
+  if(clickGameScore)clickGameScore.textContent=`${clickDifficultyConfig[clickDifficulty].label} · ${clickTime} saniye hazır`;
+  setActiveButtons("click",clickDifficulty);
+  document.querySelectorAll(".time-buttons button").forEach(b=>b.classList.toggle("selected",Number(b.dataset.time)===clickTime));
+}
+function stopClickGame(){
+  if(clickTimer){clearInterval(clickTimer);clickTimer=null;}
+  if(clickCountdownTimer){clearInterval(clickCountdownTimer);clickCountdownTimer=null;}
+  clickPhase="idle";
+}
+function finishClickGame(){
+  if(clickPhase!=="playing")return;
+  clickPhase="finished"; if(clickTimer){clearInterval(clickTimer);clickTimer=null;}
+  const cfg=clickDifficultyConfig[clickDifficulty];
+  const xp=Math.min(cfg.xp,Math.max(5,Math.floor(clickCount/3)+5));
+  if(clickGameTarget){clickGameTarget.disabled=false;clickGameTarget.textContent="TEKRAR OYNA";clickGameTarget.className="click-game-target "+cfg.targetClass;}
+  if(clickGameCountdown)clickGameCountdown.textContent="SÜRE BİTTİ!";
+  if(clickGameScore)clickGameScore.textContent=`🏆 ${clickCount} tıklama · ${clickTime} saniye · +${xp} XP`;
+  addXP(xp,"Tıklama Şampiyonu");
+}
+function startClickCountdown(){
+  if(clickPhase!=="idle"&&clickPhase!=="finished")return;
+  stopClickGame(); clickCount=0; clickPhase="countdown";
+  clickGameTarget.disabled=true; clickGameTarget.textContent="BEKLE...";
+  let n=3; clickGameCountdown.textContent=n;
+  clickGameLive.textContent=`Hazırlan... · ${clickTime} sn`;
+  clickCountdownTimer=setInterval(()=>{
+    n--;
+    if(n>0){clickGameCountdown.textContent=n;return;}
+    clearInterval(clickCountdownTimer);clickCountdownTimer=null;
+    clickGameCountdown.textContent="BAŞLA!";
+    clickGameTarget.disabled=false; clickGameTarget.textContent="TIKLA!";
+    clickPhase="playing";
+    let remaining=clickTime;
+    clickGameLive.textContent=`${clickCount} tıklama · ${remaining} sn`;
+    clickTimer=setInterval(()=>{
+      remaining--;
+      clickGameLive.textContent=`${clickCount} tıklama · ${remaining} sn`;
+      if(remaining<=0)finishClickGame();
+    },1000);
+  },1000);
+}
+clickGameTarget?.addEventListener("click",()=>{
+  if(clickPhase==="playing"){
+    clickCount++;
+    clickGameLive.textContent=`${clickCount} tıklama · süre devam ediyor`;
+    clickGameScore.textContent=`${clickCount} tıklama`;
+  }else if(clickPhase==="idle"||clickPhase==="finished") startClickCountdown();
+});
+document.querySelectorAll("[data-difficulty-group=\"click\"] button").forEach(b=>b.addEventListener("click",()=>{
+  if(clickPhase==="countdown"||clickPhase==="playing")return;
+  clickDifficulty=b.dataset.difficulty;resetClickGame();
+}));
+document.querySelectorAll(".time-buttons button").forEach(b=>b.addEventListener("click",()=>{
+  if(clickPhase==="countdown"||clickPhase==="playing")return;
+  clickTime=Number(b.dataset.time);resetClickGame();
+}));
+
+// ---------------- HAFIZA OYUNU ----------------
+const memoryGame=document.getElementById("memoryGame");
+const memoryStatus=document.getElementById("memoryGameStatus");
+const memoryStartButton=document.getElementById("memoryStartButton");
+let memoryDifficulty="easy", memoryOpened=[], memoryLocked=false, memoryFound=0;
+const memoryConfig={easy:{pairs:2,xp:20},medium:{pairs:6,xp:40},hard:{pairs:8,xp:65}};
+const memorySymbols=["🚀","💻","🎮","🧩","⭐","🔥","👾","🎯","🪙","⚡","🧠","🌙","🛡️","🎲","🏆","🔑"];
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+function resetMemoryGame(){
+  memoryOpened=[];memoryLocked=false;memoryFound=0;
+  setActiveButtons("memory",memoryDifficulty);
+  if(memoryStartButton)memoryStartButton.textContent="Oyunu Başlat";
+  if(memoryStatus)memoryStatus.textContent=`${memoryConfig[memoryDifficulty].pairs*2} kart · Hazır`;
+  if(memoryGame)memoryGame.innerHTML="";
+}
+function buildMemoryGame(){
+  memoryOpened=[];memoryLocked=false;memoryFound=0;
+  const pairs=memoryConfig[memoryDifficulty].pairs;
+  const vals=shuffle(memorySymbols.slice(0,pairs).flatMap(v=>[v,v]));
+  memoryGame.innerHTML=vals.map((v,i)=>`<button type="button" class="memory-card" data-i="${i}" data-v="${v}">?</button>`).join("");
+  memoryGame.className=`memory-grid memory-grid-large memory-${memoryDifficulty}`;
+  memoryStatus.textContent=`0 / ${pairs} eşleşme`;
+  memoryGame.querySelectorAll(".memory-card").forEach(btn=>btn.addEventListener("click",()=>{
+    if(memoryLocked||btn.classList.contains("found")||memoryOpened.includes(btn))return;
+    btn.textContent=btn.dataset.v;btn.classList.add("open");memoryOpened.push(btn);
+    if(memoryOpened.length!==2)return;
+    memoryLocked=true;
+    const [a,b]=memoryOpened;
+    if(a.dataset.v===b.dataset.v){
+      a.classList.add("found");b.classList.add("found");memoryFound++;memoryOpened=[];memoryLocked=false;
+      memoryStatus.textContent=`${memoryFound} / ${pairs} eşleşme`;
+      if(memoryFound===pairs){
+        const xp=memoryConfig[memoryDifficulty].xp;memoryStatus.textContent=`🎉 Tamamladın! +${xp} XP`;addXP(xp,"Hafıza Oyunu");memoryStartButton.textContent="Tekrar Oyna";
+      }
+    }else{
+      setTimeout(()=>{a.textContent="?";b.textContent="?";a.classList.remove("open");b.classList.remove("open");memoryOpened=[];memoryLocked=false;memoryStatus.textContent=`${memoryFound} / ${pairs} eşleşme · Tekrar dene`;},700);
+    }
+  }));
+}
+memoryStartButton?.addEventListener("click",buildMemoryGame);
+document.querySelectorAll("[data-difficulty-group=\"memory\"] button").forEach(b=>b.addEventListener("click",()=>{if(memoryLocked)return;memoryDifficulty=b.dataset.difficulty;resetMemoryGame();}));
+
+// ---------------- KODLAMA QUIZ'İ ----------------
+const miniQuizButton=document.getElementById("miniQuizButton");
+const miniQuizQuestion=document.getElementById("miniQuizQuestion");
+const miniQuizOptions=document.getElementById("miniQuizOptions");
+const miniQuizScore=document.getElementById("miniQuizScore");
+const miniQuizLanguage=document.getElementById("miniQuizLanguage");
+const miniQuizDifficulty=document.getElementById("miniQuizDifficulty");
+let miniQuizState={questions:[],index:0,score:0,locked:false};
+
+const quizExtra={
+  html:[
+    {q:"Bir formda kullanıcıdan veri almak için en uygun HTML etiketi hangisidir?",a:"input",o:["input","section","footer","br"]},
+    {q:"Bir bağlantının hedef adresini hangi HTML özelliği belirler?",a:"href",o:["href","src","alt","class"]},
+    {q:"Sırasız liste oluşturmak için hangi etiket kullanılır?",a:"ul",o:["ul","ol","li","list"]}
+  ],
+  css:[
+    {q:"Bir öğeyi flex kapsayıcısına çevirmek için hangi bildirim kullanılır?",a:"display: flex",o:["display: flex","position: flex","flex: display","layout: flex"]},
+    {q:"CSS'te dış boşluk vermek için hangi özellik kullanılır?",a:"margin",o:["margin","padding","gap","border"]},
+    {q:"Bir öğenin köşelerini yuvarlamak için hangi özellik kullanılır?",a:"border-radius",o:["border-radius","corner","radius","round"]}
+  ],
+  javascript:[
+    {q:"Bir dizinin sonuna eleman ekleyen yaygın JavaScript metodu hangisidir?",a:"push",o:["push","pop","shift","slice"]},
+    {q:"Bir koşulun doğru/yanlış sonucunu kontrol etmek için hangi ifade kullanılır?",a:"if",o:["if","for","switcher","check"]},
+    {q:"JSON metnini JavaScript nesnesine çevirmek için hangi metot kullanılır?",a:"JSON.parse",o:["JSON.parse","JSON.read","JSON.object","JSON.toObject"]}
+  ],
+  python:[
+    {q:"Python'da listeye yeni eleman eklemek için hangi metot kullanılır?",a:"append",o:["append","push","add","insertEnd"]},
+    {q:"Python'da bir fonksiyon tanımlamak için hangi anahtar kelime kullanılır?",a:"def",o:["def","function","func","method"]},
+    {q:"Python'da sözlük yapısı hangi parantezlerle yazılır?",a:"{}",o:["{}","[]","()","<>"]}
+  ],
+  java:[
+    {q:"Java'da nesne oluşturmak için hangi anahtar kelime sık kullanılır?",a:"new",o:["new","make","create","object"]},
+    {q:"Java'da metin için yaygın kullanılan sınıf hangisidir?",a:"String",o:["String","Text","CharList","Words"]},
+    {q:"Java'da bir sınıfın başka sınıftan kalıtım alması için hangi anahtar kelime kullanılır?",a:"extends",o:["extends","inherits","base","using"]}
+  ],
+  cpp:[
+    {q:"C++'ta standart çıktı akışında sık kullanılan nesne hangisidir?",a:"cout",o:["cout","cin","print","output"]},
+    {q:"C++'ta bir işaretçinin adresini almak için hangi operatör kullanılır?",a:"&",o:["&","*","#","@"]},
+    {q:"C++'ta dinamik bellek ayırmada hangi anahtar kelime kullanılır?",a:"new",o:["new","malloc","create","alloc"]}
+  ],
+  csharp:[
+    {q:"C#'ta bir sınıftan kalıtım almak için hangi sembol kullanılır?",a:":",o:[":","->","=>","extends"]},
+    {q:"C#'ta metin türü hangisidir?",a:"string",o:["string","text","str","char[]"]},
+    {q:"Unity'de bir GameObject'e erişmek için sık kullanılan özellik hangisidir?",a:"gameObject",o:["gameObject","objectGame","unityObject","sceneObject"]}
+  ],
+  sql:[
+    {q:"SQL'de sonuçları sıralamak için hangi ifade kullanılır?",a:"ORDER BY",o:["ORDER BY","SORT BY","GROUP BY","FILTER BY"]},
+    {q:"SQL'de koşullu filtreleme için hangi ifade kullanılır?",a:"WHERE",o:["WHERE","WHEN","FILTER","HAVING ONLY"]},
+    {q:"SQL'de yeni kayıt eklemek için hangi komut kullanılır?",a:"INSERT",o:["INSERT","ADD","CREATE ROW","PUSH"]}
+  ]
+};
+function buildMiniQuizQuestions(langKey,diff){
+  const lessons=(courseLanguages[langKey]?.lessons||[]).map((l,i)=>({q:l.question,a:l.answer,o:[l.answer,"yanlış cevap","bilmiyorum",String(i+1)]}));
+  const extras=quizExtra[langKey]||[];
+  let pool=lessons.concat(extras);
+  if(diff==="medium") pool=shuffle(pool).slice(0,Math.min(7,pool.length));
+  else if(diff==="hard") pool=shuffle(pool.concat(extras,lessons)).slice(0,Math.min(10,pool.length+extras.length));
+  else pool=shuffle(pool).slice(0,Math.min(5,pool.length));
+  return pool.map(q=>({...q,o:shuffle(q.o||[q.a,"yanlış cevap","bilmiyorum"])}));
+}
+function resetMiniQuiz(){
+  miniQuizState={questions:[],index:0,score:0,locked:false};
+  if(miniQuizQuestion)miniQuizQuestion.textContent=`${courseLanguages[miniQuizLanguage?.value||"html"]?.name||"HTML"} · ${miniQuizDifficulty?.value||"easy"} · Başlatmaya hazır`;
+  if(miniQuizOptions)miniQuizOptions.innerHTML="";
+  if(miniQuizScore)miniQuizScore.textContent="0 puan";
+  if(miniQuizButton)miniQuizButton.textContent="Quiz'i Başlat";
+}
+function drawMiniQuiz(){
+  const st=miniQuizState;
+  if(st.index>=st.questions.length){
+    const total=st.questions.length, xp=Math.min(60,Math.max(10,st.score*8));
+    miniQuizQuestion.textContent=`🎉 Quiz bitti! ${st.score} / ${total} doğru`;
+    miniQuizOptions.innerHTML=`<button type="button" class="game-button" id="miniQuizAgain">🔄 Tekrar Dene</button>`;
+    miniQuizScore.textContent=`${st.score}/${total} · +${xp} XP`;
+    addXP(xp,"Kodlama Quiz'i");
+    document.getElementById("miniQuizAgain")?.addEventListener("click",()=>startMiniQuiz());
+    return;
+  }
+  const q=st.questions[st.index];
+  miniQuizQuestion.innerHTML=`<span class="quiz-number">Soru ${st.index+1}/${st.questions.length}</span>${escapeHtml(q.q)}`;
+  miniQuizOptions.innerHTML=(q.o||[]).map(o=>`<button type="button" class="quiz-option mini-quiz-option" data-answer="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join("");
+  miniQuizScore.textContent=`Puan: ${st.score}`;
+  miniQuizOptions.querySelectorAll(".mini-quiz-option").forEach(btn=>btn.addEventListener("click",()=>{
+    if(st.locked)return;st.locked=true;
+    const correct=normalizeAnswer(btn.dataset.answer)===normalizeAnswer(q.a);
+    btn.classList.add(correct?"quiz-correct":"quiz-wrong");
+    if(correct){st.score++;playCourseSound("correct");}else playCourseSound("wrong");
+    setTimeout(()=>{st.index++;st.locked=false;drawMiniQuiz();},450);
+  }));
+}
+function startMiniQuiz(){
+  const lang=miniQuizLanguage.value,diff=miniQuizDifficulty.value;
+  miniQuizState={questions:buildMiniQuizQuestions(lang,diff),index:0,score:0,locked:false};
+  miniQuizButton.textContent="Quiz Devam Ediyor";
+  drawMiniQuiz();
+}
+miniQuizButton?.addEventListener("click",startMiniQuiz);
+miniQuizLanguage?.addEventListener("change",resetMiniQuiz);
+miniQuizDifficulty?.addEventListener("change",resetMiniQuiz);
+resetClickGame();resetMemoryGame();resetMiniQuiz();
 
 // ----------------------------------------------------
 // ADMİN: XP / ilerleme / duyuru

@@ -260,28 +260,73 @@
     <section id="oyunlar-mini" class="section mini-games-section">
         <p class="small-title">🎮 MİNİ OYUNLAR</p>
         <h2>Kısa Eğlence Alanı</h2>
-        <p class="section-description">Ders arasında mini oyunlarla puan topla.</p>
-        <div class="mini-game-grid">
-            <article class="mini-game-card">
-                <div class="mini-game-icon">🖱️</div><h3>Tıklama Şampiyonu</h3>
-                <p>10 saniyede kaç kez tıklayabilirsin?</p>
-                <button id="clickGameButton" class="game-button" type="button">Oyunu Başlat</button>
-                <strong id="clickGameScore">Hazır</strong>
-            </article>
-            <article class="mini-game-card">
-                <div class="mini-game-icon">🧠</div><h3>Hafıza Oyunu</h3>
-                <p>4 kutudaki eşleşmeyi bul.</p>
-                <div id="memoryGame" class="memory-grid"></div>
-                <strong id="memoryGameStatus">Başlatmak için bir kutuya tıkla</strong>
-            </article>
-            <article class="mini-game-card">
-                <div class="mini-game-icon">💻</div><h3>Kodlama Quiz'i</h3>
-                <p id="miniQuizQuestion">Hazır olduğunda başlat.</p>
-                <button id="miniQuizButton" class="game-button" type="button">Quiz'i Başlat</button>
-                <strong id="miniQuizScore">0 puan</strong>
-            </article>
-        </div>
+        <p class="section-description">Bir oyuna gir, zorluk seviyeni seç ve puanını yükselt.</p>
+        <button id="openMiniGamesButton" class="mini-games-open" type="button">🎮 MİNİ OYUNLARI AÇ</button>
     </section>
+
+    <div id="miniGamesModal" class="mini-games-modal" hidden aria-hidden="true">
+        <div class="mini-games-box">
+            <button id="miniGamesClose" class="feature-close" type="button">×</button>
+            <div id="miniGamesMenu" class="mini-games-screen">
+                <p class="small-title">🎮 OYUN MERKEZİ</p>
+                <h2>Bir oyun seç</h2>
+                <p class="mini-games-note">Her oyunda kolay, orta ve zor seçenekleri var.</p>
+                <div class="mini-game-choice-grid">
+                    <button class="mini-game-choice" data-mini-game="click" type="button">
+                        <span>🖱️</span><strong>Tıklama Şampiyonu</strong><small>Süreyi seç, geri sayımı bekle ve rekorunu kır.</small>
+                    </button>
+                    <button class="mini-game-choice" data-mini-game="memory" type="button">
+                        <span>🧠</span><strong>Hafıza Oyunu</strong><small>Kartları eşleştir. Seviye yükseldikçe kart sayısı artar.</small>
+                    </button>
+                    <button class="mini-game-choice" data-mini-game="quiz" type="button">
+                        <span>💻</span><strong>Kodlama Quiz'i</strong><small>Dilini ve zorluk seviyeni kendin seç.</small>
+                    </button>
+                </div>
+            </div>
+
+            <div id="clickGameScreen" class="mini-games-screen" hidden>
+                <button class="mini-back" data-back-mini type="button">← Oyunlara Dön</button>
+                <p class="small-title">🖱️ TIKLAMA ŞAMPİYONU</p>
+                <h2>Rekorunu kır!</h2>
+                <div class="mini-settings-row">
+                    <div><span>Zorluk</span><div class="difficulty-buttons" data-difficulty-group="click"><button type="button" data-difficulty="easy">🟢 Kolay</button><button type="button" data-difficulty="medium">🟡 Orta</button><button type="button" data-difficulty="hard">🔴 Zor</button></div></div>
+                    <div><span>Süre</span><div class="time-buttons"><button type="button" data-time="10">10 sn</button><button type="button" data-time="20">20 sn</button><button type="button" data-time="30">30 sn</button><button type="button" data-time="60">60 sn</button></div></div>
+                </div>
+                <div id="clickGameArena" class="click-game-arena">
+                    <div id="clickGameCountdown" class="click-game-countdown">HAZIR</div>
+                    <button id="clickGameTarget" class="click-game-target" type="button">BAŞLAT</button>
+                    <div id="clickGameLive" class="click-game-live">0 tıklama · 10 sn</div>
+                </div>
+                <p id="clickGameScore" class="mini-game-result">Hazır</p>
+            </div>
+
+            <div id="memoryGameScreen" class="mini-games-screen" hidden>
+                <button class="mini-back" data-back-mini type="button">← Oyunlara Dön</button>
+                <p class="small-title">🧠 HAFIZA OYUNU</p>
+                <h2>Eşleşen kartları bul</h2>
+                <div class="difficulty-buttons memory-difficulty" data-difficulty-group="memory"><button type="button" data-difficulty="easy">🟢 Kolay · 4 kart</button><button type="button" data-difficulty="medium">🟡 Orta · 12 kart</button><button type="button" data-difficulty="hard">🔴 Zor · 16 kart</button></div>
+                <button id="memoryStartButton" class="game-button" type="button">Oyunu Başlat</button>
+                <div id="memoryGame" class="memory-grid memory-grid-large"></div>
+                <strong id="memoryGameStatus" class="mini-game-result">Başlamak için düğmeye bas.</strong>
+            </div>
+
+            <div id="quizGameScreen" class="mini-games-screen" hidden>
+                <button class="mini-back" data-back-mini type="button">← Oyunlara Dön</button>
+                <p class="small-title">💻 KODLAMA QUIZ'İ</p>
+                <h2>Dilini ve seviyeni seç</h2>
+                <div class="quiz-setup-grid">
+                    <label>Dil<select id="miniQuizLanguage"><option value="html">HTML</option><option value="css">CSS</option><option value="javascript">JavaScript</option><option value="python">Python</option><option value="java">Java</option><option value="cpp">C++</option><option value="csharp">C#</option><option value="sql">SQL</option></select></label>
+                    <label>Zorluk<select id="miniQuizDifficulty"><option value="easy">🟢 Kolay</option><option value="medium">🟡 Orta</option><option value="hard">🔴 Zor</option></select></label>
+                </div>
+                <button id="miniQuizButton" class="game-button" type="button">Quiz'i Başlat</button>
+                <div id="miniQuizArea" class="mini-quiz-area">
+                    <p id="miniQuizQuestion">Hazır olduğunda quiz'i başlat.</p>
+                    <div id="miniQuizOptions" class="mini-quiz-options"></div>
+                    <strong id="miniQuizScore" class="mini-game-result">0 puan</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <section id="iletisim" class="section contact-section">
         <p class="small-title">İLETİŞİM</p>

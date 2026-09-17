@@ -934,3 +934,51 @@ body[data-theme="light"] .quiz-setup-grid select { background:#fff;color:#102218
   .memory-card { width:70px;height:70px;font-size:1.6rem; }
   .memory-grid-large.memory-easy { grid-template-columns:repeat(2,75px); }
 }
+
+/* ----------------------------------------------------
+   DAHA DOĞAL GİRİŞ EKRANI
+---------------------------------------------------- */
+.auth-gate {
+    background:
+        radial-gradient(circle at 50% 18%, rgba(37, 180, 101, .13), transparent 32%),
+        linear-gradient(145deg, #030806 0%, #07120c 52%, #020604 100%);
+    backdrop-filter: blur(14px);
+    padding: 18px;
+}
+.auth-box {
+    width: min(440px, 100%);
+    padding: 34px 32px 22px;
+    border: 1px solid rgba(126, 231, 159, .18);
+    border-radius: 22px;
+    background: rgba(7, 19, 13, .94);
+    box-shadow: 0 28px 80px rgba(0,0,0,.62), inset 0 1px rgba(255,255,255,.035);
+    text-align: left;
+    animation: authEnter .45s ease both;
+}
+@keyframes authEnter { from { opacity:0; transform:translateY(12px) scale(.985); } to { opacity:1; transform:none; } }
+.auth-top { text-align:center; margin-bottom:18px; }
+.auth-avatar { width:76px; height:76px; margin:0 auto 12px; padding:3px; border-radius:50%; background:linear-gradient(145deg,#43d77b,#0e6d3d); box-shadow:0 8px 28px rgba(30,180,91,.16); }
+.auth-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+.auth-brand { font-size:.72rem; letter-spacing:.22em; font-weight:900; color:#b8eac9; }
+.auth-line { width:42px; height:2px; margin:11px auto 0; border-radius:9px; background:#2eb968; opacity:.65; }
+.auth-kicker { margin:0 0 5px; color:#72cf96; font-size:.72rem; font-weight:900; letter-spacing:.16em; text-align:center; }
+.auth-box h2 { margin:0; text-align:center; font-size:2rem; letter-spacing:-.03em; }
+.auth-note { text-align:center; color:#9db7a7; font-size:.93rem; margin:8px 0 22px; }
+.auth-panel { display:grid; gap:9px; }
+.auth-label { color:#c7dbce; font-size:.78rem; font-weight:800; margin-top:2px; }
+.auth-input { min-height:50px; padding:12px 14px; border-radius:11px; border:1px solid rgba(154,214,174,.16); background:#040b07; color:#f4fff7; font-size:.97rem; transition:.2s ease; }
+.auth-input::placeholder { color:#617569; }
+.auth-input:focus { border-color:rgba(67,215,123,.65); box-shadow:0 0 0 3px rgba(67,215,123,.08); background:#06100a; }
+.auth-action { min-height:51px; margin-top:5px; border:0; border-radius:11px; background:#188b4d; color:white; font-weight:900; letter-spacing:.02em; cursor:pointer; transition:.18s ease; }
+.auth-action span { margin-left:7px; font-size:1.1rem; }
+.auth-action:hover { transform:translateY(-1px); background:#1b9c57; box-shadow:0 9px 24px rgba(24,139,77,.18); }
+.admin-action { background:#5f3aa8; }
+.admin-action:hover { background:#7046c1; }
+.auth-link { border:0; background:transparent; color:#8db89c; cursor:pointer; font-weight:700; padding:6px; font-size:.84rem; }
+.auth-link:hover { color:#c4f5d3; }
+.auth-link b { color:#b8efc9; }
+.admin-link { color:#9988bf; margin-top:3px; }
+.auth-message { min-height:22px; margin:10px 0 0; text-align:center; font-size:.86rem; }
+.auth-message.bad { color:#ff9b9b; } .auth-message.good { color:#8ee7aa; }
+.auth-footer { margin-top:17px; padding-top:13px; border-top:1px solid rgba(255,255,255,.055); color:#607568; text-align:center; font-size:.72rem; }
+@media(max-width:520px){ .auth-box{padding:27px 20px 18px;border-radius:18px}.auth-avatar{width:68px;height:68px}.auth-box h2{font-size:1.7rem} }

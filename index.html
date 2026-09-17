@@ -22,34 +22,46 @@
 <!-- GİRİŞ / HESAP SİSTEMİ -->
 <div id="authGate" class="auth-gate" aria-hidden="false">
     <div class="auth-box">
-        <div class="auth-logo">🔐</div>
-        <p class="small-title">GÜVENLİ GİRİŞ</p>
-        <h2 id="authTitle">Lütfen giriş yapın veya hesap oluşturun</h2>
-        <p class="auth-note">Siteyi kullanmak için önce bir hesapla giriş yapmalısın.</p>
+        <div class="auth-top">
+            <div class="auth-avatar"><img src="images/profil.png" alt="Göktuğ"></div>
+            <div class="auth-brand">GÖKTUĞ KUGU</div>
+            <div class="auth-line"></div>
+        </div>
+        <p class="auth-kicker" id="authKicker">BURASI SENİN ALANIN</p>
+        <h2 id="authTitle">Hoş geldin 👋</h2>
+        <p class="auth-note">Devam etmek için hesabına giriş yap.</p>
 
         <div id="loginPanel" class="auth-panel">
-            <input id="loginName" class="auth-input" type="text" maxlength="12" placeholder="İsim (en fazla 12 karakter)">
-            <input id="loginPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="4 haneli şifre">
-            <button id="loginButton" class="auth-action" type="button">🚪 GİRİŞ YAP</button>
-            <button id="showRegister" class="auth-link" type="button">Hesabım yok — Hesap Oluştur</button>
-            <button id="showAdmin" class="auth-link admin-link" type="button">👑 Admin Girişi</button>
+            <label class="auth-label" for="loginName">Kullanıcı adı</label>
+            <input id="loginName" class="auth-input" type="text" maxlength="12" autocomplete="username" placeholder="Kullanıcı adını yaz">
+            <label class="auth-label" for="loginPassword">4 haneli şifre</label>
+            <input id="loginPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••">
+            <button id="loginButton" class="auth-action" type="button">GİRİŞ YAP <span>→</span></button>
+            <button id="showRegister" class="auth-link" type="button">Hesabın yok mu? <b>Hesap oluştur</b></button>
+            <button id="showAdmin" class="auth-link admin-link" type="button">⚙️ Admin girişi</button>
         </div>
 
         <div id="registerPanel" class="auth-panel" hidden>
-            <input id="registerName" class="auth-input" type="text" maxlength="12" placeholder="İsim (1-12 karakter)">
-            <input id="registerPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="Şifre (tam 4 hane)">
-            <button id="registerButton" class="auth-action" type="button">✨ HESAP OLUŞTUR</button>
-            <button id="showLoginFromRegister" class="auth-link" type="button">Zaten hesabım var — Giriş Yap</button>
+            <label class="auth-label" for="registerName">Kullanıcı adı</label>
+            <input id="registerName" class="auth-input" type="text" maxlength="12" autocomplete="username" placeholder="1–12 karakter">
+            <label class="auth-label" for="registerPassword">Şifre</label>
+            <input id="registerPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="Tam 4 rakam">
+            <button id="registerButton" class="auth-action" type="button">HESAP OLUŞTUR <span>→</span></button>
+            <button id="showLoginFromRegister" class="auth-link" type="button">Zaten hesabın var mı? <b>Giriş yap</b></button>
         </div>
 
         <div id="adminPanelLogin" class="auth-panel" hidden>
-            <input id="adminName" class="auth-input" type="text" maxlength="12" placeholder="Admin adı (1-12 karakter)">
-            <input id="adminPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="Admin şifresi (4 hane)">
+            <label class="auth-label" for="adminName">Admin adı</label>
+            <input id="adminName" class="auth-input" type="text" maxlength="12" placeholder="Admin adı">
+            <label class="auth-label" for="adminPassword">Admin şifresi</label>
+            <input id="adminPassword" class="auth-input" type="password" inputmode="numeric" maxlength="4" placeholder="4 rakam">
+            <label class="auth-label" for="adminCode">Admin kodu</label>
             <input id="adminCode" class="auth-input" type="text" maxlength="16" placeholder="Admin kodu">
-            <button id="adminLoginButton" class="auth-action admin-action" type="button">👑 ADMİN GİRİŞİ</button>
-            <button id="showLoginFromAdmin" class="auth-link" type="button">← Normal Giriş</button>
+            <button id="adminLoginButton" class="auth-action admin-action" type="button">ADMİN GİRİŞİ <span>→</span></button>
+            <button id="showLoginFromAdmin" class="auth-link" type="button">← Normal girişe dön</button>
         </div>
         <p id="authMessage" class="auth-message" aria-live="polite"></p>
+        <div class="auth-footer">🔒 Hesabınla giriş yaptıktan sonra site açılır.</div>
     </div>
 </div>
 

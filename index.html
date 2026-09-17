@@ -3,201 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Göktuğ | Kişisel Sitem</title>
+    <title>Göktuğ | Kişisel Site</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <div class="background">
-        <div class="glow glow-1"></div>
-        <div class="glow glow-2"></div>
-        <div class="glow glow-3"></div>
-    </div>
+<header class="navbar">
+    <a class="logo" href="#anasayfa">Göktuğ</a>
+    <nav>
+        <a href="#anasayfa">Ana Sayfa</a>
+        <a href="#hakkimda">Hakkımda</a>
+        <a href="#oyunlar">Oyunlarım</a>
+        <!-- Projeler artık doğrudan GitHub hesabını açıyor -->
+        <a href="https://github.com/SCQRPION" target="_blank" rel="noopener noreferrer">Projeler</a>
+    </nav>
+</header>
 
-    <header>
-        <div class="logo">GÖKTUĞ<span>.</span></div>
-
-        <nav>
-            <a href="#anasayfa">Ana Sayfa</a>
-            <a href="#hakkimda">Hakkımda</a>
-            <a href="#oyunlarim">Oyunlarım</a>
-            <a href="#projeler">Projeler</a>
-        </nav>
-    </header>
-
+<main>
     <section id="anasayfa" class="hero">
-        <div class="hero-content">
-
-            <div class="profile">
-                <div class="profile-circle">
-                    <img src="images/profil.png" alt="Profil fotoğrafı">
-                </div>
-            </div>
-
-            <p class="small-title">👋 MERHABA, BEN</p>
-
-            <h1><span>Göktuğ</span></h1>
-
-            <h2>Oyun geliştiren ve yeni şeyler öğrenen biriyim.</h2>
-
-            <p class="description">
-                Burada yaptığım oyunları, projeleri ve öğrendiğim
-                şeyleri paylaşacağım.
-            </p>
-
-            <div class="buttons">
-                <a href="#oyunlarim" class="main-button">🎮 Oyunlarımı Gör</a>
-                <a href="#projeler" class="second-button">📂 Projeler</a>
-            </div>
+        <div class="profile-circle">
+            <img src="images/profil.png" alt="Profil fotoğrafı">
         </div>
 
-        <div class="scroll-down">↓</div>
+        <p class="small-title">MERHABA 👋</p>
+        <h1>Ben <span>Göktuğ</span></h1>
+        <p class="hero-text">
+            Oyun geliştirmeyi, kod yazmayı ve yeni projeler üretmeyi seviyorum.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="#oyunlar" class="btn primary">Oyunlarımı Gör</a>
+            <a href="https://github.com/SCQRPION" target="_blank" rel="noopener noreferrer" class="btn secondary">GitHub'ım</a>
+        </div>
     </section>
 
     <section id="hakkimda" class="section">
-        <p class="section-title">HAKKIMDA</p>
+        <p class="small-title">HAKKIMDA</p>
         <h2>Ben Kimim?</h2>
-
-        <div class="about-card">
-            <div class="about-icon">👨‍💻</div>
-
-            <div>
-                <p>
-                    Merhaba! Ben Göktuğ. Oyun geliştirmeyi,
-                    bilgisayarlarla uğraşmayı ve yeni şeyler
-                    öğrenmeyi seviyorum.
-                </p>
-
-                <p>
-                    Şu anda kendi oyunlarımı geliştiriyor ve
-                    farklı projeler üzerinde çalışıyorum.
-                </p>
-            </div>
-        </div>
+        <p>
+            Merhaba! Ben Göktuğ. Oyun geliştirmeyi ve bilgisayarla yeni şeyler
+            yapmayı öğreniyorum. Bu sitede yaptığım oyunları ve projeleri
+            paylaşacağım.
+        </p>
     </section>
 
-    <section id="oyunlarim" class="section">
-        <p class="section-title">🎮 OYUNLARIM</p>
-        <h2>Yaptığım Oyunlar</h2>
+    <section id="oyunlar" class="section">
+        <p class="small-title">OYUNLARIM</p>
+        <h2>Oyunlar</h2>
+        <p class="section-description">
+            Bir oyuna tıkla. Seni Play Store'da o kategoriye ait rastgele bir
+            oyunun sayfasına götüreceğim.
+        </p>
 
-        <div class="cards">
+        <div class="game-grid">
 
-            <div class="game-card">
-                <div class="game-image">🎮</div>
+            <article class="game-card" data-category="horror" tabindex="0" role="button" aria-label="Korku oyunu seç">
+                <div class="game-icon">👻</div>
+                <h3>Korku Oyunu</h3>
+                <p>Korku temalı oyunlardan rastgele birini aç.</p>
+                <button class="game-button" type="button">Play Store'da Aç</button>
+            </article>
 
-                <div class="game-content">
-                    <h3>Korku Oyunu</h3>
+            <article class="game-card" data-category="coin" tabindex="0" role="button" aria-label="Macera ve coin oyunu seç">
+                <div class="game-icon">🪙</div>
+                <h3>Coin Adventure</h3>
+                <p>Coin ve macera temalı oyunlardan rastgele birini aç.</p>
+                <button class="game-button" type="button">Play Store'da Aç</button>
+            </article>
 
-                    <p>
-                        Unity ile geliştirdiğim küçük bir
-                        korku oyunu.
-                    </p>
-
-                    <span class="tag">Unity</span>
-                    <span class="tag">3D</span>
-
-                    <button class="card-button" onclick="gameMessage()">
-                        Yakında
-                    </button>
-                </div>
-            </div>
-
-            <div class="game-card">
-                <div class="game-image">🪙</div>
-
-                <div class="game-content">
-                    <h3>Coin Adventure</h3>
-
-                    <p>
-                        Altınları toplayıp çıkış kapısına
-                        ulaşmaya çalıştığın küçük bir oyun.
-                    </p>
-
-                    <span class="tag">Unity</span>
-                    <span class="tag">3D</span>
-
-                    <button class="card-button" onclick="gameMessage()">
-                        Yakında
-                    </button>
-                </div>
-            </div>
-
-            <div class="game-card">
-                <div class="game-image">🚀</div>
-
-                <div class="game-content">
-                    <h3>Yeni Proje</h3>
-
-                    <p>
-                        Yeni oyun projesi üzerinde çalışıyorum.
-                    </p>
-
-                    <span class="tag">Yakında</span>
-
-                    <button class="card-button" onclick="gameMessage()">
-                        Yakında
-                    </button>
-                </div>
-            </div>
+            <article class="game-card" data-category="random" tabindex="0" role="button" aria-label="Rastgele mobil oyun seç">
+                <div class="game-icon">🎮</div>
+                <h3>Yeni Proje</h3>
+                <p>Karışık popüler mobil oyunlardan rastgele birini aç.</p>
+                <button class="game-button" type="button">Play Store'da Aç</button>
+            </article>
 
         </div>
     </section>
 
-    <section id="projeler" class="section">
-        <p class="section-title">📂 PROJELER</p>
+    <section id="projeler" class="section projects-section">
+        <p class="small-title">PROJELER</p>
         <h2>Projelerim</h2>
-
-        <div class="project-list">
-
-            <div class="project-card">
-                <div class="project-number">01</div>
-
-                <div>
-                    <h3>Unity Korku Oyunu</h3>
-
-                    <p>
-                        3D ortam, kapılar, anahtarlar,
-                        ses efektleri ve jumpscare içeren
-                        oyun projesi.
-                    </p>
-                </div>
-            </div>
-
-            <div class="project-card">
-                <div class="project-number">02</div>
-
-                <div>
-                    <h3>Kişisel Web Sitesi</h3>
-
-                    <p>
-                        HTML, CSS ve JavaScript kullanılarak
-                        hazırlanan kişisel web sitesi.
-                    </p>
-                </div>
-            </div>
-
-            <div class="project-card">
-                <div class="project-number">03</div>
-
-                <div>
-                    <h3>Yeni Proje</h3>
-
-                    <p>
-                        Yakında burada yeni bir projem olacak.
-                    </p>
-                </div>
-            </div>
-
-        </div>
+        <p>
+            Tüm projelerimi GitHub hesabımda görebilirsin.
+        </p>
+        <a href="https://github.com/SCQRPION" target="_blank" rel="noopener noreferrer" class="btn primary">
+            GitHub Hesabımı Aç
+        </a>
     </section>
+</main>
 
-    <footer>
-        <div class="footer-logo">GÖKTUĞ<span>.</span></div>
-        <p>Kendi dünyamı kodluyorum. 🚀</p>
-        <p class="copyright">© 2026 Göktuğ</p>
-    </footer>
+<footer>
+    <p>© 2026 Göktuğ — Tüm hakları saklıdır.</p>
+</footer>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

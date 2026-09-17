@@ -97,3 +97,20 @@ if ("IntersectionObserver" in window) {
 // ----------------------------------------------------
 
 console.log("Göktuğ'un sitesi çalışıyor!");
+
+
+// ----------------------------------------------------
+// DEVAM BUTONU -> HİZMETLERİ GÖSTER
+// ----------------------------------------------------
+const continueButton = document.getElementById("continueButton");
+const servicesSection = document.getElementById("hizmetler");
+
+if (continueButton && servicesSection) {
+    continueButton.addEventListener("click", () => {
+        servicesSection.classList.add("show");
+        servicesSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    });
+}

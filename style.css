@@ -1109,3 +1109,24 @@ body[data-theme="light"] .quiz-setup-grid select { background:#fff;color:#102218
 .lab-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.lab-toolbar button{cursor:pointer}
 @media(max-width:900px){.academy-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.big-project-head{flex-direction:column}}
 @media(max-width:560px){.academy-feature-grid{grid-template-columns:1fr}.roadmap-row{grid-template-columns:38px 1fr}.roadmap-row .roadmap-badge{grid-column:2;justify-self:start}}
+
+/* V8 — BUG AVI + GERCEK GELISIM PANELI + PROJEYI SEN SEC
+   Sadece yeni UI; V7 ve eski stiller korunur. */
+.bug-hunt-grid,.project-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.bug-card,.project-choice-card{padding:18px;border:1px solid rgba(134,239,172,.14);border-radius:18px;background:rgba(255,255,255,.035);text-align:left}
+.bug-card h3,.project-choice-card h3{margin:0 0 8px;font-size:19px}
+.bug-card p,.project-choice-card p{margin:0 0 12px;opacity:.78;line-height:1.6}
+.bug-code{width:100%;min-height:190px;resize:vertical;padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:#0a0d0f;color:#eafff1;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;box-sizing:border-box}
+.bug-result,.progress-panel,.project-plan{margin-top:16px;padding:16px;border-radius:16px;border:1px solid rgba(134,239,172,.13);background:rgba(255,255,255,.035)}
+.bug-result.good{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
+.bug-result.bad{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+.bug-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.progress-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:18px}
+.progress-big,.progress-level{padding:20px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(134,239,172,.13)}
+.progress-big strong{display:block;font-size:36px;margin:4px 0 8px}.progress-bar-wide{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.progress-bar-wide i{display:block;height:100%;background:rgba(134,239,172,.8);border-radius:inherit}
+.progress-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.progress-stat{padding:14px;border-radius:14px;background:rgba(255,255,255,.035);text-align:center}.progress-stat b{display:block;font-size:21px}.progress-stat small{opacity:.65}
+.skill-progress-row{display:grid;grid-template-columns:150px 1fr 48px;gap:10px;align-items:center;margin:11px 0}.skill-progress-row .bar{height:9px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}.skill-progress-row .bar i{display:block;height:100%;border-radius:inherit;background:rgba(96,165,250,.78)}
+.project-choice-card{cursor:pointer;transition:transform .18s ease,border-color .18s ease}.project-choice-card:hover{transform:translateY(-3px);border-color:rgba(134,239,172,.35)}
+.project-plan ol{margin:10px 0 0;padding-left:22px}.project-plan li{margin:8px 0;line-height:1.5}.choice-tag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:1px;padding:5px 8px;border-radius:999px;background:rgba(134,239,172,.09);margin-bottom:9px}
+@media(max-width:850px){.bug-hunt-grid,.project-choice-grid,.progress-hero{grid-template-columns:1fr}.progress-stats-grid{grid-template-columns:repeat(2,1fr)}.skill-progress-row{grid-template-columns:110px 1fr 42px}}
+@media(max-width:520px){.progress-stats-grid{grid-template-columns:1fr 1fr}.skill-progress-row{grid-template-columns:1fr 45px}.skill-progress-row .bar{grid-column:1/-1}}

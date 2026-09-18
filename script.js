@@ -1599,3 +1599,78 @@ renderAcademyTrackCards();
   document.getElementById('academyExamButton')?.addEventListener('click',examChooser);
   document.getElementById('academyLabButton')?.addEventListener('click',lab);
 })();
+
+/* =========================================================
+   V8 — BUG AVI + GERCEK GELISIM PANELI + PROJEYI SEN SEC
+   Sadece yeni sistemler eklenir. V7 fonksiyonlari degistirilmez.
+========================================================= */
+(function(){
+  const featureModal=document.getElementById('academyFeatureModal');
+  const featureContent=document.getElementById('academyFeatureContent');
+  if(!featureModal||!featureContent)return;
+  const openFeatureV8=(html)=>{featureContent.innerHTML=html;featureModal.classList.add('open');featureModal.setAttribute('aria-hidden','false');};
+
+  const bugs=[
+    {title:'JavaScript — Parantez Avı',lang:'JavaScript',code:`function selamla(isim) {\n  console.log("Merhaba " + isim;\n}`,question:'Bu kod neden hata verir?',answer:'Parantez eksik',hint:'console.log satırının sonunda açılan parantezleri tek tek eşleştir.'},
+    {title:'HTML — Etiket Avı',lang:'HTML',code:`<main>\n  <h1>Benim Sitem</h1>\n  <p>Merhaba!\n</main>`,question:'Hangi yapı eksik?',answer:'p kapanış etiketi',hint:'Açılan her HTML etiketi için kapanış yapısını kontrol et.'},
+    {title:'CSS — Noktalı Virgül Avı',lang:'CSS',code:`.kart {\n  padding: 20px\n  border-radius: 12px;\n}`,question:'CSS burada neden beklenmedik davranabilir?',answer:'noktalı virgül eksik',hint:'Bir CSS özelliği ile sonraki özellik arasındaki ayrımı kontrol et.'},
+    {title:'Python — Girinti Avı',lang:'Python',code:`puan = 10\nif puan > 5:\nprint("Kazandın")`,question:'Sorun hangi kavramla ilgili?',answer:'girinti',hint:'Koşulun içinde çalışacak satırın bir blok içinde olduğunu düşün.'}
+  ];
+  let bugIndex=0,bugAttempts=0;
+  function renderBug(){
+    const b=bugs[bugIndex];
+    openFeatureV8(`<p class="small-title">🐛 BUG AVI</p><h2 class="feature-title">Hatalı kodu yakala</h2><p class="feature-sub">Kod çalışmıyor. Görevin hatanın mantığını bulmak. Cevabı hemen vermiyoruz.</p><div class="bug-hunt-grid"><div class="bug-card"><span class="choice-tag">${b.lang}</span><h3>${b.title}</h3><pre class="bug-code">${escapeHtmlV8(b.code)}</pre></div><div class="bug-card"><h3>🔎 Görev</h3><p>${b.question}</p><input id="bugAnswerV8" class="exercise-input" placeholder="Hatanın ne olduğunu yaz..."><div class="bug-toolbar"><button id="bugCheckV8" class="exercise-check" type="button">🐛 HATAYI BUL</button><button id="bugNextV8" class="course-start small-finish" type="button">Sonraki Bug →</button></div><div id="bugResultV8" class="bug-result" aria-live="polite">${bugIndex+1} / ${bugs.length} bug</div></div></div>`);
+    document.getElementById('bugCheckV8').onclick=checkBug;
+    document.getElementById('bugNextV8').onclick=()=>{bugIndex=(bugIndex+1)%bugs.length;bugAttempts=0;renderBug();};
+    document.getElementById('bugAnswerV8').addEventListener('keydown',e=>{if(e.key==='Enter')checkBug();});
+  }
+  function checkBug(){
+    const b=bugs[bugIndex],input=document.getElementById('bugAnswerV8'),result=document.getElementById('bugResultV8');
+    const v=String(input.value||'').toLowerCase().replace(/[ı]/g,'i');
+    const keys=b.answer.toLowerCase().split(' ');
+    const ok=keys.every(k=>v.includes(k.replace(/[ı]/g,'i'))) || (b.lang==='JavaScript'&&v.includes('parantez')) || (b.lang==='HTML'&&v.includes('kapan')) || (b.lang==='CSS'&&v.includes('noktal')) || (b.lang==='Python'&&v.includes('girinti'));
+    if(ok){bugAttempts=0;result.className='bug-result good';result.innerHTML='<b>🎯 BUG YAKALANDI!</b><p>Doğru. Hatanın mantığını sen buldun.</p><small>İpucu: '+b.hint+'</small>';try{window.v4Sound?.('good')}catch(e){}}
+    else{bugAttempts++;result.className='bug-result bad';result.innerHTML=`<b>❌ Henüz değil.</b><p>${bugAttempts>=3?'💡 Küçük yardım: '+b.hint:'Kodu tekrar satır satır incele. Açılan/kapanan yapıları ve sözdizimini kontrol et.'}</p><small>${bugAttempts} deneme</small>`;try{window.v4Sound?.('bad')}catch(e){}}
+  }
+
+  function progressPanel(){
+    const p=academyUserProfile()||{completed:{},xp:0};
+    const total=Object.values(academyTracks).reduce((n,t)=>n+t.lessons.length,0);
+    const done=Object.keys(p.completed||{}).length;
+    const pct=total?Math.min(100,Math.round(done/total*100)):0;
+    const level=Math.max(1,Math.floor((p.xp||0)/100)+1);
+    const nextXP=level*100;
+    const projectsDone=localStorage.getItem('goktug_big_project_v7')?1:0;
+    const bugsSolved=Number(localStorage.getItem('goktug_v8_bugs_solved')||0);
+    const langs=Object.entries(academyTracks).map(([k,t])=>{const d=academyTrackDone(k),pc=Math.round(d/t.lessons.length*100);return `<div class="skill-progress-row"><span>${t.icon} ${t.name.replace('Sıfırdan ','')}</span><div class="bar"><i style="width:${pc}%"></i></div><strong>${pc}%</strong></div>`}).join('');
+    openFeatureV8(`<p class="small-title">📊 GERÇEK GELİŞİM PANELİ</p><h2 class="feature-title">Kendi gelişimini gör</h2><p class="feature-sub">Ders, XP ve proje ilerlemen tek yerde.</p><div class="progress-hero"><div class="progress-big"><small>TOPLAM İLERLEME</small><strong>${pct}%</strong><div class="progress-bar-wide"><i style="width:${pct}%"></i></div><p>${done} / ${total} eğitim bölümü tamamlandı.</p></div><div class="progress-level"><small>SEVİYE</small><strong style="font-size:30px;display:block;margin:6px 0">LEVEL ${level}</strong><p>${p.xp||0} XP / ${nextXP} XP sonraki seviyeye</p></div></div><div class="progress-stats-grid"><div class="progress-stat"><b>${p.xp||0}</b><small>XP</small></div><div class="progress-stat"><b>${done}</b><small>Ders</small></div><div class="progress-stat"><b>${projectsDone}</b><small>Büyük Proje</small></div><div class="progress-stat"><b>${bugsSolved}</b><small>Bug</small></div></div><div class="progress-panel"><h3>🧩 Beceri Haritan</h3>${langs}</div>`);
+  }
+
+  const choices=[
+    {id:'site',icon:'🌐',title:'Kendi Web Sitem',desc:'HTML, CSS ve JavaScript öğrenerek modern bir site oluştur.',skills:['HTML temelleri','CSS tasarım','JavaScript etkileşim','Responsive tasarım'],path:['HTML → Yapı','CSS → Görünüm','JavaScript → Etkileşim','Büyük Proje → Yayınlanabilir site']},
+    {id:'game',icon:'🎮',title:'Kendi Oyunumu Yapacağım',desc:'Oyun mantığını öğren, sonra C# ve oyun sistemlerine geç.',skills:['Programlama mantığı','Değişkenler','Koşullar & döngüler','C# / oyun sistemleri'],path:['Programlama Temelleri','C# temelleri','Hareket & oyun mantığı','Büyük oyun projesi']},
+    {id:'app',icon:'📱',title:'Basit Uygulama',desc:'Kullanıcı etkileşimleri ve veri mantığıyla küçük bir uygulama tasarla.',skills:['Değişkenler','Koşullar','Fonksiyonlar','Arayüz mantığı'],path:['Programlama Temelleri','JavaScript temelleri','Kod Laboratuvarı','Uygulama projesi']},
+    {id:'tool',icon:'🧮',title:'Kendi Aracımı Yapacağım',desc:'Hesap makinesi, dönüştürücü veya günlük işini kolaylaştıran bir araç yap.',skills:['Fonksiyonlar','Koşullar','DOM etkileşimi','Hata ayıklama'],path:['Temeller','JavaScript','Bug Avı','Gerçek proje']}
+  ];
+  function chooseProject(){
+    openFeatureV8(`<p class="small-title">🤖 PROJEYİ SEN SEÇ</p><h2 class="feature-title">Ne yapmak istiyorsun?</h2><p class="feature-sub">Bir fikir seç. Sana gereken becerileri ve önerilen sırayı çıkaralım.</p><div class="project-choice-grid">${choices.map(c=>`<button type="button" class="project-choice-card" data-choice="${c.id}"><span style="font-size:28px">${c.icon}</span><span class="choice-tag">PROJE</span><h3>${c.title}</h3><p>${c.desc}</p></button>`).join('')}</div>`);
+    featureContent.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>showPlan(b.dataset.choice));
+  }
+  function showPlan(id){
+    const c=choices.find(x=>x.id===id)||choices[0];
+    openFeatureV8(`<p class="small-title">🤖 KİŞİSEL PROJE YOLU</p><h2 class="feature-title">${c.icon} ${c.title}</h2><p class="feature-sub">Bu projeyi yaparken özellikle şu becerilere ihtiyacın olacak:</p><div class="project-plan"><h3>🎯 Öğrenmen gerekenler</h3><p>${c.skills.map(x=>'• '+x).join('<br>')}</p><h3 style="margin-top:18px">🗺️ Önerilen sıra</h3><ol>${c.path.map(x=>`<li>${x}</li>`).join('')}</ol><button id="chooseProjectStartV8" class="exercise-check" type="button">🚀 Bu Yola Başla</button></div>`);
+    document.getElementById('chooseProjectStartV8').onclick=()=>{document.getElementById('academyFeatureClose')?.click();setTimeout(()=>{const key=id==='game'?'game':id==='site'?'web':'fundamentals';if(typeof window.openAcademyTrack==='function')window.openAcademyTrack(key);else document.querySelector(`.track-card[data-track="${key}"]`)?.click();},80);};
+  }
+  function escapeHtmlV8(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  document.getElementById('academyBugHuntButton')?.addEventListener('click',renderBug);
+  document.getElementById('academyProgressButton')?.addEventListener('click',progressPanel);
+  document.getElementById('academyChooseProjectButton')?.addEventListener('click',chooseProject);
+
+  // Keep a small persistent Bug Avı counter without touching existing XP/profile data.
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#bugCheckV8')){
+      setTimeout(()=>{const r=document.getElementById('bugResultV8');if(r&&r.classList.contains('good'))localStorage.setItem('goktug_v8_bugs_solved',String(Number(localStorage.getItem('goktug_v8_bugs_solved')||0)+1));},30);
+    }
+  });
+})();

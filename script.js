@@ -1316,3 +1316,175 @@ renderAcademyTrackCards();
     };
   }
 })();
+
+/* =========================================================
+   V6 RELIABILITY PATCH
+   - One shared audio engine for success/failure/help
+   - 3-wrong hint system for ALL coding-language practice
+   - Per-language hint counters
+   - One-time admin announcement consumption
+========================================================= */
+(function(){
+  const V6_STATE="goktug_v6_learning_state";
+  const V6_ANNOUNCE_SEEN="goktug_v6_seen_announcements";
+  let audioCtx=null;
+
+  function state(){
+    try{return JSON.parse(localStorage.getItem(V6_STATE)||'{}')}catch(e){return {}}
+  }
+  function save(s){localStorage.setItem(V6_STATE,JSON.stringify(s))}
+  function getAttempts(key){const s=state();return Number(s["a_"+key]||0)}
+  function setAttempts(key,n){const s=state();s["a_"+key]=n;save(s)}
+  function resetAttempts(key){const s=state();delete s["a_"+key];save(s)}
+
+  function tone(kind){
+    try{
+      audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==="suspended") audioCtx.resume();
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      const t=audioCtx.currentTime;
+      if(kind==="good"){
+        o.type="sine";o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(820,t+.13);
+        g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+        o.start(t);o.stop(t+.34);
+      }else if(kind==="bad"){
+        o.type="triangle";o.frequency.setValueAtTime(210,t);o.frequency.exponentialRampToValueAtTime(105,t+.22);
+        g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.11,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.28);
+        o.start(t);o.stop(t+.3);
+      }else{
+        o.type="sine";o.frequency.setValueAtTime(380,t);o.frequency.exponentialRampToValueAtTime(560,t+.12);
+        g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.2);
+        o.start(t);o.stop(t+.22);
+      }
+    }catch(e){}
+  }
+
+  // Unlock audio on the user's first real interaction, then our generated
+  // sounds can play reliably in browsers that block autoplay.
+  document.addEventListener("pointerdown",()=>{try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}},{once:true});
+
+  function languageFromPage(){
+    const el=document.querySelector("#academyModal [data-language],#academyModal .academy-language.active");
+    return el?.dataset?.language || document.querySelector("#academyModal .academy-language")?.textContent?.trim() || "genel";
+  }
+
+  function currentKey(){
+    const title=document.querySelector("#academyModal h3")?.textContent?.trim() || "ders";
+    return languageFromPage()+"::"+title;
+  }
+
+  function hintFor(title, lang){
+    const t=(title+" "+lang).toLowerCase();
+    if(t.includes("html")) return "HTML'de önce sayfanın iskeletini düşün. Başlık için başlık etiketi, metin için paragraf etiketi kullan.";
+    if(t.includes("css")) return "CSS'te önce hangi elementi değiştireceğini seç, sonra değiştirmek istediğin özelliği yaz.";
+    if(t.includes("javascript")||t.includes("js")) return "JavaScript'te değişkenleri bilgi kutuları gibi düşün. Önce bilgiyi sakla, sonra kullan.";
+    if(t.includes("python")) return "Python'da girintiye dikkat et. Koşul veya döngüden sonra içeri giren kod bloğunu kontrol et.";
+    if(t.includes("java")) return "Java'da veri tipini ve değişken adını birlikte düşün. Sonra değeri ata.";
+    if(t.includes("c#")||t.includes("csharp")) return "C# kodunda sınıf, metot ve değişkenin görevlerini birbirinden ayır.";
+    if(t.includes("c++")) return "C++'ta değişkenin türünü yazıp sonra adını ve değerini kontrol et.";
+    if(t.includes("sql")) return "SQL'de önce hangi tablodan veri istediğini, sonra hangi sütunları istediğini düşün.";
+    return "Soruyu küçük parçalara ayır. Önce senden istenen kavramı bul, sonra örnekteki mantığı kendi kodunda uygula.";
+  }
+
+  function addHint(target, title, lang){
+    if(!target)return;
+    let box=target.querySelector(".v6-help-box");
+    if(!box){box=document.createElement("div");box.className="v6-help-box";target.appendChild(box)}
+    box.innerHTML="💡 <b>3 denemelik küçük yardım:</b> "+hintFor(title,lang);
+    tone("help");
+  }
+
+  function feedback(good, title, lang){
+    tone(good?"good":"bad");
+    const box=document.querySelector("#academyModal .deep-course-box");
+    if(box){
+      box.classList.remove("academy-success-flash","academy-error-flash");
+      void box.offsetWidth;box.classList.add(good?"academy-success-flash":"academy-error-flash");
+    }
+    if(!good){
+      const key=currentKey(), n=getAttempts(key)+1;setAttempts(key,n);
+      if(n>=3){
+        const area=document.querySelector("#academyModal .deep-lesson")||document.querySelector("#academyModal .academy-practice");
+        addHint(area,title,lang);
+      }
+    }else resetAttempts(currentKey());
+  }
+
+  // Global capture layer: catches controls regardless of whether the original
+  // code declared its functions globally.
+  document.addEventListener("click",function(e){
+    const btn=e.target.closest("#academyCheck,#academyRunCodePractice,#academyRunLab,#academyFinishLab");
+    if(!btn)return;
+    setTimeout(()=>{
+      const fb=document.querySelector("#academyFeedback");
+      const text=(fb?.textContent||"").toLowerCase();
+      const good=fb?.classList.contains("good") || /doğru|başarılı|tamamlandı|geçtin/.test(text);
+      const title=document.querySelector("#academyModal h3")?.textContent||"ders";
+      feedback(good,title,languageFromPage());
+    },80);
+  },true);
+
+  // Language-course safety net: if a lesson uses .exercise-check without the
+  // Academy-specific IDs, it still gets the same 3-wrong hint behavior.
+  document.addEventListener("click",function(e){
+    const btn=e.target.closest(".exercise-check");
+    if(!btn)return;
+    setTimeout(()=>{
+      const root=btn.closest(".deep-lesson,.practice-card,.academy-practice")||btn.parentElement;
+      const msg=(root?.textContent||"").toLowerCase();
+      const good=/doğru|başarılı|tamamlandı|geçtin/.test(msg);
+      const title=document.querySelector("#academyModal h3")?.textContent||"kod görevi";
+      feedback(good,title,languageFromPage());
+    },100);
+  },true);
+
+  // Admin announcements: a notice is NEW only once. Closing/reading it stores
+  // its id, so it will not appear on every future visit.
+  function announcementId(item){
+    if(!item)return "";
+    return String(item.id||item.createdAt||item.text||"").trim();
+  }
+  function seen(){
+    try{return JSON.parse(localStorage.getItem(V6_ANNOUNCE_SEEN)||"[]")}catch(e){return []}
+  }
+  function markSeen(id){
+    if(!id)return;
+    const a=seen();if(!a.includes(id)){a.unshift(id);localStorage.setItem(V6_ANNOUNCE_SEEN,JSON.stringify(a.slice(0,30)))}
+  }
+  function getLatest(){
+    try{
+      const a=JSON.parse(localStorage.getItem(typeof ANNOUNCE_KEY!=="undefined"?ANNOUNCE_KEY:"admin_announcements")||"[]");
+      return Array.isArray(a)&&a.length?a[0]:null;
+    }catch(e){return null}
+  }
+  function showNew(){
+    const item=getLatest(), id=announcementId(item);
+    const banner=document.getElementById("adminAnnouncementBanner");
+    const text=document.getElementById("adminAnnouncementBannerText");
+    if(!banner||!text||!item||!id||seen().includes(id))return;
+    text.textContent=item.text||"";
+    banner.hidden=false;
+  }
+  window.addEventListener("load",()=>setTimeout(showNew,350));
+  window.addEventListener("storage",e=>{if(e.key&&/announce/i.test(e.key))setTimeout(showNew,50)});
+  document.getElementById("adminAnnouncementClose")?.addEventListener("click",()=>{
+    const item=getLatest();markSeen(announcementId(item));
+    const b=document.getElementById("adminAnnouncementBanner");if(b)b.hidden=true;
+  });
+  // Reading it also counts as seen after a short delay, so it does not return
+  // on every entry.
+  setTimeout(()=>{
+    const b=document.getElementById("adminAnnouncementBanner");
+    if(b&&!b.hidden){
+      const item=getLatest();markSeen(announcementId(item));
+    }
+  },4000);
+
+  // Enter/Tab-friendly code controls.
+  document.addEventListener("keydown",function(e){
+    if(e.key!=="Enter")return;
+    const a=e.target;
+    if(a.matches("#academyAnswer")){e.preventDefault();document.querySelector("#academyCheck")?.click()}
+  });
+})();

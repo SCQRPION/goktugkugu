@@ -1075,12 +1075,79 @@ function openAcademyTrack(key){academyActiveTrack=key;academyLessonIndex=0;const
 function renderAcademyLessonMap(){const el=document.getElementById("academyLessonMap"),t=academyTracks[academyActiveTrack],p=academyUserProfile();el.innerHTML=t.lessons.map((l,i)=>{const done=!!p?.completed?.[`${academyActiveTrack}_${i}`];return `<button class="map-lesson ${i===academyLessonIndex?"active":""} ${done?"done":""}" data-i="${i}"><span>${done?"✓":String(i+1).padStart(2,"0")}</span><b>${l.title}</b></button>`}).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.i);const p=academyUserProfile();if(i>0&&!p?.completed?.[`${academyActiveTrack}_${i-1}`]){academyFeedback("Önce bir önceki görevi tamamla. Böylece temelleri atlamıyoruz.",false);return;}academyLessonIndex=i;renderAcademyLessonMap();renderAcademyLesson();});}
 function renderAcademyLesson(){const t=academyTracks[academyActiveTrack],l=t.lessons[academyLessonIndex],done=!!academyUserProfile()?.completed?.[`${academyActiveTrack}_${academyLessonIndex}`];document.getElementById("academyLessonBreadcrumb").textContent=`${t.icon} ${t.name}  /  Bölüm ${academyLessonIndex+1}`;document.getElementById("academyLessonTitle").textContent=l.title;document.getElementById("academyLessonText").innerHTML=`<p>${l.text}</p>`;document.getElementById("academyExample").innerHTML=`<div class="example-label">👀 ÖRNEK / MANTIĞI GÖR</div><pre>${l.example}</pre>`;const area=document.getElementById("academyPracticeArea");if(l.kind==="webcode")renderAcademyWebPractice(area,l);else if(l.kind==="code")renderAcademyCodePractice(area,l);else renderAcademyTextPractice(area,l,done);document.getElementById("academyTrackProgressText").textContent=`${academyTrackDone(academyActiveTrack)} / ${t.lessons.length} bölüm`;document.getElementById("academyTrackProgressBar").style.width=`${Math.round(academyTrackDone(academyActiveTrack)/t.lessons.length*100)}%`;updateAcademyStats();}
 function renderAcademyTextPractice(area,l,done){area.innerHTML=`<div class="practice-title">🧪 ŞİMDİ SEN DENE</div><p>${l.task}</p><div class="answer-row"><input id="academyAnswer" class="exercise-input" placeholder="Cevabını kendin yaz..." ${done?"disabled":""}><button id="academyCheck" class="exercise-check" ${done?"disabled":""}>${done?"✓ Tamamlandı":"Kontrol Et"}</button></div>`;if(!done){document.getElementById("academyCheck").onclick=()=>checkAcademyText(l);}else academyFeedback("Bu bölümü daha önce tamamladın. İstersen yukarıdaki örneği tekrar inceleyebilirsin.",true);}
-function checkAcademyText(l){const v=normalizeAnswer(document.getElementById("academyAnswer").value);const a=normalizeAnswer(l.answer);let ok=v===a||a.split(" ").every(x=>v.includes(x));if(l.title==="Fonksiyonlar")ok=v.includes("tekrar")||v.includes("kullan");if(l.title==="Bilgisayar nasıl düşünür?")ok=v.split(/\s+/).length>=3;if(!ok){academyPracticeAttempts++;academyFeedback("Henüz değil. İpucunu tekrar oku ve kendi cevabını dene.",false);return;}saveAcademyCompletion();academyFeedback("Doğru. Şimdi bunu sen yaptın — bölüm tamamlandı! +25 XP",true);setTimeout(nextAcademyLesson,700);}
-function renderAcademyCodePractice(area,l){area.innerHTML=`<div class="practice-title">⌨️ KODU SEN YAZ</div><p>${l.task}</p><textarea id="academyCodePractice" class="academy-code">${l.starter}</textarea><button id="academyRunCodePractice" class="exercise-check">▶ Çalıştır / Kontrol Et</button><pre id="academyCodeOutput" class="code-output">Hazır. Kodunu yaz ve çalıştır.</pre>`;document.getElementById("academyRunCodePractice").onclick=()=>{const code=document.getElementById("academyCodePractice").value;const out=document.getElementById("academyCodeOutput");if(!code.trim()){out.textContent="Kod alanı boş. Önce kendin yazmayı dene.";return;}const lower=code.toLowerCase();
-  const needs= l.title==="Değişkenlerle oyun durumu" ? ["can"] : (l.title==="C# temelleri" ? ["class"] : ["console","puan","let","const"]);
-  const ok=needs.some(x=>lower.includes(x));
-  if(ok){saveAcademyCompletion();out.textContent="✓ Kontrol başarılı. Kodunda görev için gereken yapı bulundu! +25 XP";academyFeedback("Doğru! Kontrolü geçtin. Sonraki bölüm açıldı.",true);setTimeout(nextAcademyLesson,700);}
-  else{out.textContent="✗ Henüz değil. Görevin istediği yapıyı koduna ekle ve tekrar kontrol et.";academyFeedback("Biraz daha dene. İpucunu okuyup kodu kendin düzelt.",false);}};}
+function checkAcademyText(l){
+ const input=document.getElementById("academyAnswer");
+ const v=normalizeAnswer(input.value);
+ const a=normalizeAnswer(l.answer);
+ let ok=v===a||a.split(" ").every(x=>v.includes(x));
+ if(l.title==="Fonksiyonlar") ok=v.includes("tekrar")||v.includes("kullan");
+ if(l.title==="Bilgisayar nasıl düşünür?") ok=v.split(/\s+/).length>=3;
+ if(!ok){
+   academyPracticeAttempts++;
+   const hint=academyHintFor(l);
+   const extra=academyPracticeAttempts>=3 ? ` <div class="smart-hint">💡 <b>3 deneme oldu.</b> Küçük yardım: ${hint}</div>` : "";
+   academyFeedback("Henüz değil. İpucunu tekrar oku ve kendi cevabını dene."+extra,false);
+   return;
+ }
+ academyPracticeAttempts=0;
+ saveAcademyCompletion();
+ academyFeedback("Doğru. Şimdi bunu sen yaptın — bölüm tamamlandı! +25 XP",true);
+ setTimeout(nextAcademyLesson,700);
+}
+function academyHintFor(l){
+ const t=(l.title||"").toLowerCase();
+ if(t.includes("algoritma")) return "Problemi çözmek için yapacağın adımları sırayla yaz. Önce ne olacak, sonra ne olacak?";
+ if(t.includes("değişken")) return "Değişkeni bir kutu gibi düşün: içine bir bilgi koyarsın, sonra o bilgiye isimle ulaşırsın.";
+ if(t.includes("koşul")||t.includes("if")) return "Bir şeyin doğru veya yanlış olmasına göre farklı yol seçmeyi düşün.";
+ if(t.includes("döngü")) return "Aynı işi tekrar tekrar yapmak istediğinde döngü kullanırsın.";
+ if(t.includes("fonksiyon")) return "Tekrar kullanacağın işi bir isim altında toplamak işini kolaylaştırır.";
+ return "Örnekteki temel kavramı kendi cümlenle açıklamayı dene; cevabı kopyalamak yerine mantığı kullan.";
+}
+
+function renderAcademyCodePractice(area,l){
+ const hint=academyHintFor(l);
+ area.innerHTML=`<div class="practice-title">⌨️ KODU SEN YAZ</div>
+ <p>${l.task}</p>
+ <textarea id="academyCodePractice" class="academy-code">${l.starter}</textarea>
+ <button id="academyRunCodePractice" class="exercise-check">▶ Çalıştır / Kontrol Et</button>
+ <div id="academyCodeMistakes" class="smart-mistakes">0 yanlış deneme</div>
+ <div id="academyCodeHint" class="smart-hint" hidden>💡 <b>Yardım:</b> ${hint}</div>
+ <pre id="academyCodeOutput" class="code-output">Hazır. Kodunu yaz ve çalıştır.</pre>`;
+ let attempts=0;
+ document.getElementById("academyRunCodePractice").onclick=()=>{
+   const code=document.getElementById("academyCodePractice").value;
+   const out=document.getElementById("academyCodeOutput");
+   if(!code.trim()){out.textContent="Kod alanı boş. Önce kendin yazmayı dene.";return;}
+   const lower=code.toLowerCase();
+   let ok=false;
+   if(l.title==="Değişkenlerle oyun durumu") ok=/(let|const|var)\s+can\b/.test(lower)||lower.includes("can");
+   else if(l.title==="C# temelleri") ok=lower.includes("class")&&lower.includes("void");
+   else if(l.title.toLowerCase().includes("fonksiyon")) ok=lower.includes("function")||lower.includes("=>");
+   else if(l.title.toLowerCase().includes("koşul")) ok=lower.includes("if");
+   else if(l.title.toLowerCase().includes("döngü")) ok=lower.includes("for")||lower.includes("while");
+   else ok=lower.includes("console")||lower.includes("puan")||lower.includes("let")||lower.includes("const");
+
+   if(ok){
+     attempts=0;
+     document.getElementById("academyCodeMistakes").textContent="✓ Başarılı kontrol";
+     document.getElementById("academyCodeHint").hidden=true;
+     saveAcademyCompletion();
+     out.textContent="✓ Kodun görev için gereken yapıyı içeriyor. +25 XP";
+     academyFeedback("Doğru! Kod kontrolünü geçtin. Sonraki bölüm açıldı.",true);
+     setTimeout(nextAcademyLesson,700);
+   }else{
+     attempts++;
+     document.getElementById("academyCodeMistakes").textContent=`${attempts} yanlış deneme`;
+     out.textContent="✗ Henüz değil. Kodu değiştirip tekrar kontrol et.";
+     if(attempts>=3){
+       document.getElementById("academyCodeHint").hidden=false;
+       out.textContent="💡 3 deneme oldu. Küçük yardım açıldı. Şimdi kodu kendin düzelt.";
+     }
+     academyFeedback(attempts>=3?"3 denemeye ulaştın; küçük yardım açıldı.":"Biraz daha dene.",false);
+   }
+ };
+}
+
 function renderAcademyWebPractice(area,l){area.innerHTML=`<div class="practice-title">🌐 CANLI SİTE LABORATUVARI</div><p>${l.task}</p><div class="web-lab"><div class="lab-editors"><label>HTML<textarea id="academyLabHTML"><h1>Benim Sitem</h1>\n<p>Burayı kendin değiştir.</p>\n<button id="labButton">Tıkla</button></textarea></label><label>CSS<textarea id="academyLabCSS">body { font-family: sans-serif; padding: 30px; }\nh1 { letter-spacing: 1px; }</textarea></label><label>JavaScript<textarea id="academyLabJS">document.addEventListener('click', (e) => {\n  if(e.target.id === 'labButton') e.target.textContent = 'Çalıştı!';\n});</textarea></label></div><iframe id="academyLivePreview" title="Canlı önizleme"></iframe></div><button id="academyRunLab" class="exercise-check">▶ Önizlemeyi Güncelle</button><button id="academyFinishLab" class="course-start small-finish">✓ Görevi Tamamladım</button>`;const update=()=>{const html=document.getElementById("academyLabHTML").value,css=document.getElementById("academyLabCSS").value,js=document.getElementById("academyLabJS").value;document.getElementById("academyLivePreview").srcdoc=`<style>${css}</style>${html}<script>${js.replace(/<\/script>/gi,"<\\/script>")}<\/script>`;};document.getElementById("academyRunLab").onclick=update;document.getElementById("academyFinishLab").onclick=()=>{saveAcademyCompletion();academyFeedback("Kendi kodunu çalıştırıp görevi tamamladın! +25 XP",true);setTimeout(nextAcademyLesson,700);};update();}
 function academyFeedback(msg,good){const el=document.getElementById("academyFeedback");el.textContent=(good?"✅ ":"💡 ")+msg;el.className=`course-feedback ${good?"good":"bad"}`;}
 function nextAcademyLesson(){const t=academyTracks[academyActiveTrack];if(academyLessonIndex<t.lessons.length-1){academyLessonIndex++;renderAcademyLessonMap();renderAcademyLesson();}else{academyFeedback("🎉 Bu eğitim yolunu tamamladın! Artık öğrendiklerini kendi projenle birleştirme zamanı.",true);renderAcademyLessonMap();}}
@@ -1192,4 +1259,60 @@ renderAcademyTrackCards();
     if(!e.target.closest("#adminAnnouncementButton"))return;
     setTimeout(refreshV4Announcement,50);
   });
+})();
+
+/* =========================================================
+   V5 — AKILLI ÖĞRENME KATMANI
+   Eski sistemlere dokunmadan üzerine eklenir.
+========================================================= */
+(function(){
+  const SMART_KEY="goktug_smart_learning_v1";
+  function getSmart(){
+    try{return JSON.parse(localStorage.getItem(SMART_KEY)||'{"practice":0,"days":0,"last":""}')}
+    catch(e){return {practice:0,days:0,last:""}}
+  }
+  function saveSmart(x){localStorage.setItem(SMART_KEY,JSON.stringify(x));}
+  function today(){return new Date().toISOString().slice(0,10);}
+  function updateSmart(){
+    const p=getSmart(), t=today();
+    if(p.last!==t){
+      if(p.last){
+        const prev=new Date(p.last), cur=new Date(t);
+        const d=Math.round((cur-prev)/86400000);
+        p.days=d===1?p.days+1:1;
+      }else p.days=1;
+      p.last=t; saveSmart(p);
+    }
+    const s=document.getElementById("academySmartPanel");
+    if(!s)return;
+    s.hidden=false;
+    const goal=document.getElementById("academySmartGoal");
+    const streak=document.getElementById("academySmartStreak");
+    const practice=document.getElementById("academySmartPractice");
+    if(goal)goal.textContent="1 ders + 1 uygulama";
+    if(streak)streak.textContent=`${p.days||1} gün`;
+    if(practice)practice.textContent=`${p.practice||0} görev`;
+  }
+  document.addEventListener("click",function(e){
+    if(e.target.closest("#academyRunCodePractice,#academyRunLab,#academyFinishLab,#academyCheck")){
+      const p=getSmart(); p.practice=(p.practice||0)+1; saveSmart(p); updateSmart();
+    }
+  });
+  window.addEventListener("load",()=>setTimeout(updateSmart,400));
+  window.addEventListener("click",e=>{
+    if(e.target.closest("#academyButton")) setTimeout(updateSmart,100);
+  });
+})();
+
+(function(){
+  const oldOpen=window.openAcademy;
+  if(typeof oldOpen==="function"){
+    window.openAcademy=function(){
+      oldOpen();
+      const m=document.getElementById("academy-method-cards");
+      if(m)m.hidden=false;
+      const s=document.getElementById("academySmartPanel");
+      if(s)s.hidden=false;
+    };
+  }
 })();

@@ -408,184 +408,77 @@ const courseLanguages = {
     }
 };
 
-let selectedLanguages = [];
+let activeTrack = null;
+let deepLessonIndex = 0;
+let practiceAttempts = 0;
+// Eski profil yöneticisiyle uyumluluk değişkenleri
 let activeLanguage = null;
 let lessonIndex = 0;
 
-function renderLanguageChoices() {
-    if (!languageGrid) return;
-    languageGrid.innerHTML = Object.entries(courseLanguages).map(([key, lang]) => `
-        <div class="language-option">
-            <input type="checkbox" id="lang-${key}" value="${key}">\n            <label for="lang-${key}">\n                <span class="language-logo">${lang.icon}</span>\n                <span class="language-name">${lang.name}</span>\n                <span class="language-level">Başlangıç → İleri</span>\n            </label>\n        </div>
-    `).join("");
+const deepTracks = {
+  fundamentals:{name:"Programlama Temelleri",icon:"🧠",description:"Kod yazmayı öğrenmeden önce programlamanın nasıl düşündüğünü öğren.",lessons:[
+    {title:"Bilgisayar nasıl düşünür?",text:"Bilgisayar kendi başına ne yapacağını tahmin etmez. Ona küçük, açık ve sıralı talimatlar veririz. Programlama, bu talimatları bilgisayarın anlayacağı biçimde kurma işidir.",example:"Günlük hayat: Çay yap → suyu koy → ısıt → bardağı hazırla → çayı ekle. Kodda da benzer şekilde adım adım düşünürüz.",task:"Kendin için 3 adımlı bir algoritma yaz.",kind:"text",answer:"3"},
+    {title:"Algoritma nedir?",text:"Algoritma, bir problemi çözmek için izlenen düzenli adımların planıdır. İyi kod yazmanın temelinde önce problemi parçalara ayırmak vardır.",example:"Problem: Sayının çift olup olmadığını bul. 1) Sayıyı al 2) 2'ye bölümünden kalanı bul 3) Kalan 0 ise çift de.",task:"Bir sandviç hazırlama algoritmasını en az 5 adımda yaz.",kind:"text",answer:"5"},
+    {title:"Değişkenler",text:"Değişken, bilgiyi geçici olarak sakladığın isimlendirilmiş bir kutu gibidir. İsim, puan, can veya hız gibi değerleri değişkenlerde tutarsın.",example:"let puan = 0;\nlet can = 3;\nlet isim = \"Oyuncu\";",task:"Aşağıdaki kodda puanın kaç olduğunu yaz: let puan = 25;",kind:"text",answer:"25"},
+    {title:"Veri türleri",text:"Programlar farklı türde bilgilerle çalışır: metin (string), tam sayı (number/int), ondalık sayı ve doğru/yanlış (boolean) gibi.",example:"let ad = \"Ada\";\nlet yas = 14;\nlet oyunAcik = true;",task:"true değeri hangi tür bilgiyi temsil eder?",kind:"text",answer:"boolean"},
+    {title:"Operatörler",text:"+ - * / gibi işleçlerle matematik yapabilir, karşılaştırma operatörleriyle iki değeri karşılaştırabilirsin.",example:"let toplam = 10 + 5;\nlet esitMi = 10 === 10;",task:"10 + 7 işleminin sonucu nedir?",kind:"text",answer:"17"},
+    {title:"Koşullar: if / else",text:"Programın karar vermesini sağlar. Bir koşul doğruysa bir kod, değilse başka bir kod çalıştırabilirsin.",example:"let puan = 80;\nif (puan >= 50) {\n  console.log(\"Geçtin\");\n} else {\n  console.log(\"Tekrar dene\");\n}",task:"80 >= 50 doğru mu? (evet/hayır)",kind:"text",answer:"evet"},
+    {title:"Döngüler",text:"Aynı işi tekrar tekrar yazmak yerine döngüler kullanılır. for ve while en temel döngülerdendir.",example:"for (let i = 1; i <= 3; i++) {\n  console.log(i);\n}",task:"Yukarıdaki döngü kaç kez çalışır?",kind:"text",answer:"3"},
+    {title:"Fonksiyonlar",text:"Fonksiyon, belirli bir işi yapan ve gerektiğinde tekrar çağrılabilen kod bloğudur. Büyük programları küçük parçalara ayırır.",example:"function selamla(isim) {\n  return \"Merhaba \" + isim;\n}\nconsole.log(selamla(\"Ada\"));",task:"Fonksiyonlar neden kullanılır? Kısa bir cümle yaz.",kind:"text",answer:"tekrar"},
+    {title:"Diziler ve listeler",text:"Birden fazla değeri düzenli biçimde tutmak için diziler/listeler kullanılır.",example:"let oyunlar = [\"Korku\", \"Yarış\", \"Macera\"];\nconsole.log(oyunlar[0]);",task:"Yukarıdaki dizinin ilk elemanı nedir?",kind:"text",answer:"korku"},
+    {title:"Hata okumayı öğren",text:"Hata mesajı düşmanın değil, ipucundur. Önce hangi satırda olduğunu, sonra hata türünü, sonra hatanın nedenini bul.",example:"SyntaxError → yazım/sözdizimi problemi.\nReferenceError → olmayan bir isim kullanılmış olabilir.",task:"Bir hata aldığında ilk bakacağın şeylerden biri nedir? (satır)",kind:"text",answer:"satır"},
+    {title:"İlk mini programın",text:"Artık değişken, koşul ve fonksiyonu aynı küçük programda birleştirebilirsin. Bu bölümde kendi kodunu yazıp çalıştıracaksın.",example:"let puan = 75;\nif (puan >= 50) console.log(\"Başarılı\");",task:"Kod alanına 50 veya üstü bir puanla çalışan küçük bir başarı kontrolü yaz.",kind:"code",language:"javascript",starter:"let puan = 75;\n// Kodunu buraya yaz\n",check:"console"}
+  ]},
+  web:{name:"Sıfırdan Web Geliştirme",icon:"🌐",description:"Hiç site yapmamış birinin ilk HTML satırından kendi çalışan sitesine kadar ilerle.",lessons:[
+    {title:"Web sayfası nasıl çalışır?",text:"Tarayıcı HTML'yi yapıya, CSS'yi görünüme, JavaScript'i davranışa dönüştürür. Üçünü birlikte kullanınca etkileşimli siteler oluşturabilirsin.",example:"HTML = iskelet | CSS = görünüm | JavaScript = davranış",task:"HTML, CSS ve JavaScript'in görevlerini üç kelimeyle yaz.",kind:"text",answer:"yapı görünüm davranış"},
+    {title:"İlk HTML dosyan",text:"Bir web projesinin temelinde index.html bulunabilir. Tarayıcı bu dosyayı açarak sayfanı gösterir.",example:"<!doctype html>\n<html>\n  <body>\n    <h1>Merhaba!</h1>\n  </body>\n</html>",task:"HTML dosyalarının uzantısı nedir?",kind:"text",answer:"html"},
+    {title:"Başlık ve paragraf",text:"h1-h6 başlıklar, p paragraflar için kullanılır. Etiketlerin anlamını öğrenmek düzenli HTML yazmanı sağlar.",example:"<h1>Benim Sitem</h1>\n<p>İlk yazım burada.</p>",task:"Birinci seviye başlık etiketi hangisi?",kind:"text",answer:"h1"},
+    {title:"Linkler ve resimler",text:"a etiketi bağlantı, img etiketi resim eklemek için kullanılır. alt metni erişilebilirlik için önemlidir.",example:"<a href=\"https://example.com\">Site</a>\n<img src=\"profil.png\" alt=\"Profil\">",task:"Bağlantı etiketi hangisidir?",kind:"text",answer:"a"},
+    {title:"CSS ile ilk tasarım",text:"CSS seçicilerle HTML elemanlarını hedefler ve özelliklerle görünümlerini değiştirir.",example:"h1 {\n  font-size: 40px;\n  margin-bottom: 10px;\n}",task:"CSS'te yazı boyutu özelliği nedir?",kind:"text",answer:"font-size"},
+    {title:"Kutu modeli",text:"Bir elemanın content, padding, border ve margin bölgelerini anlamak modern tasarımın temelidir.",example:".kart { padding: 20px; margin: 10px; border: 1px solid; }",task:"İç boşluğu hangi özellik kontrol eder?",kind:"text",answer:"padding"},
+    {title:"Flexbox ile yerleşim",text:"Flexbox elemanları tek boyutlu olarak hizalamayı kolaylaştırır. Menü, kart ve buton düzenlerinde çok kullanılır.",example:".menu { display: flex; gap: 16px; justify-content: center; }",task:"Flexbox'ı başlatan değer nedir?",kind:"text",answer:"flex"},
+    {title:"JavaScript ile etkileşim",text:"Bir butona tıklanınca metin değiştirmek gibi davranışları JavaScript ile yapabilirsin.",example:"document.querySelector(\"button\").addEventListener(\"click\", () => {\n  alert(\"Tıkladın!\");\n});",task:"Kullanıcının tıklamasını dinlemek için hangi event kullanılır?",kind:"text",answer:"click"},
+    {title:"Kendi mini siteni yap",text:"Şimdi HTML + CSS + JavaScript'i birleştir. Aşağıdaki editörde kodu değiştir ve sonucu canlı önizlemede gör.",example:"Bir başlık, açıklama ve buton ekle. Butona basılınca mesaj değişsin.",task:"Canlı editörde kendi mini sayfanı oluştur.",kind:"webcode"},
+    {title:"Web proje görevi",text:"Final görevinde sana hazır tasarım vermiyoruz. Gereksinimleri okuyup kendi çözümünü kuracaksın.",example:"Gereksinim: Başlık + Hakkımda alanı + 3 kart + iletişim butonu + mobilde taşmayan tasarım.",task:"Editörde kendi portföy sayfanın ilk sürümünü yap.",kind:"webcode",final:true}
+  ]},
+  game:{name:"Sıfırdan Oyun Geliştirme",icon:"🎮",description:"Oyun motoruna geçmeden önce oyun mantığını kavra; sonra C# ile gerçek oyun davranışları yaz.",lessons:[
+    {title:"Oyun nedir?",text:"Bir oyun; girdiler, kurallar, durum, geri bildirim ve hedeflerin birlikte çalıştığı etkileşimli bir sistemdir.",example:"Oyuncu tuşa basar → karakter hareket eder → engelle karşılaşır → oyun durumu değişir.",task:"Bir oyunun en az 3 temel parçasını yaz.",kind:"text",answer:"oyuncu kural hedef"},
+    {title:"Değişkenlerle oyun durumu",text:"Can, puan, hız ve süre gibi değerler değişkenlerde tutulur.",example:"int can = 3;\nint puan = 0;\nfloat hiz = 5f;",task:"Oyuncunun canını tutacak değişken adını yaz: can",kind:"text",answer:"can"},
+    {title:"Koşullarla oyun kuralları",text:"Can 0 olduğunda kaybetme, puan belirli seviyeye gelince kazanma gibi kurallar koşullarla yazılır.",example:"if (can <= 0) {\n  OyunBitti();\n}",task:"Can 0 veya daha azsa ne olabilir? (oyun biter/başlar)",kind:"text",answer:"oyun biter"},
+    {title:"C# temelleri",text:"Unity'de oyun davranışları yazarken C# kullanabilirsin. Değişken ve metotların temelini öğreniyoruz.",example:"public class Player : MonoBehaviour {\n  public float hiz = 5f;\n}",task:"C# dosyalarının yaygın uzantısı nedir?",kind:"text",answer:"cs"},
+    {title:"Girdi: oyuncu kontrolü",text:"Klavye, fare veya gamepad girdileri oyuncunun dünyayla etkileşmesini sağlar. Önce girdiyi algıla, sonra davranışa çevir.",example:"Input → yön → hareket → yeni konum",task:"Oyuncu kontrolünde ilk aşamalardan biri nedir? (girdi)",kind:"text",answer:"girdi"},
+    {title:"Hareket mantığı",text:"Hareketi tek bir sihirli kod değil, yön + hız + zaman gibi parçalarla düşün.",example:"yeniKonum = eskiKonum + yön × hız × zaman",task:"Hareketi oluşturan iki önemli değeri yaz: yön ve hız",kind:"text",answer:"yön hız"},
+    {title:"Çarpışma",text:"Karakterin duvara girmemesi veya coin toplaması için çarpışma/trigger mantığını öğrenirsin.",example:"Oyuncu + Coin trigger → Coin'i topla → puanı artır",task:"Coin toplandığında hangi oyun değeri artırılabilir?",kind:"text",answer:"puan"},
+    {title:"Can, puan ve kazanma",text:"Artık değişken + koşul + etkileşimi birleştirerek oyun döngüsünün küçük parçalarını kurabilirsin.",example:"coinToplandi → puan += 10 → hedefe ulaştıysa kazan",task:"Bir coin kaç puan verebilir? Kendi değerini yaz.",kind:"text",answer:"10"},
+    {title:"İlk oyun davranışını yaz",text:"Aşağıdaki alanda küçük bir C# oyun mantığı yaz. Gerçek Unity projesinde bunu script olarak kullanabilecek seviyeye yaklaşacağız.",example:"public int puan = 0;\nvoid CoinTopla(){ puan += 10; }",task:"Coin toplandığında puanı artıran bir metot yaz.",kind:"code",language:"csharp",starter:"public int puan = 0;\nvoid CoinTopla() {\n    // kodunu yaz\n}",check:"puan"},
+    {title:"İlk oyun projesi",text:"Finalde hedef: küçük bir bölüm, hareket eden oyuncu, toplanabilir nesneler, kazanma koşulu ve yeniden başlatma sistemi. Parçaları sen birleştireceksin.",example:"PLAN → PROTOTİP → TEST → HATA DÜZELT → OYNA → GELİŞTİR",task:"Kendi mini oyun fikrini 1 cümlede yaz.",kind:"text",answer:"oyun",final:true}
+  ]}
+};
 
-    languageGrid.querySelectorAll("input").forEach(input => {
-        input.addEventListener("change", () => {
-            const checked = [...languageGrid.querySelectorAll("input:checked")];
-            if (checked.length > 2) {
-                input.checked = false;
-                return;
-            }
-            selectedLanguages = checked.map(item => item.value);
-            selectionCount.textContent = `${selectedLanguages.length} / 2 dil seçildi`;
-            startCourse.disabled = selectedLanguages.length === 0;
-        });
-    });
-}
+function courseUserProfile(){ const u=currentRealUser(); if(!u)return null; return getProfile(u.name); }
+function deepCompletedKey(){return `${activeTrack}_${deepLessonIndex}`;}
+function deepTrackDone(track){const p=courseUserProfile(); if(!p)return 0; return Object.keys(p.completed||{}).filter(k=>k.startsWith(track+"_")).length;}
+function saveDeepCompletion(){const u=currentRealUser();if(!u)return;const p=getProfile(u.name);p.completed=p.completed||{};const key=deepCompletedKey();if(!p.completed[key]){p.completed[key]=true;p.xp=(p.xp||0)+25;maybeAwardBadges(p);saveProfile(u.name,p);updateUserPanel(u);} }
+function academyStats(){const p=courseUserProfile();let total=0,done=0;Object.entries(deepTracks).forEach(([k,t])=>{total+=t.lessons.length;done+=deepTrackDone(k);});document.getElementById("academyXP")?.replaceChildren(document.createTextNode(`${p?.xp||0} XP`));document.getElementById("academyProgress")?.replaceChildren(document.createTextNode(`${total?Math.round(done/total*100):0}% ilerleme`));}
+function openCourse(){if(!courseModal)return;courseModal.classList.add("open");courseModal.setAttribute("aria-hidden","false");document.getElementById("courseHome").hidden=false;document.getElementById("deepTrackView").hidden=true;academyStats();}
+function closeCourse(){if(!courseModal)return;courseModal.classList.remove("open");courseModal.setAttribute("aria-hidden","true");}
+function renderTrackCards(){document.querySelectorAll(".track-card").forEach(b=>b.onclick=()=>openDeepTrack(b.dataset.track));}
+function openDeepTrack(key){activeTrack=key;deepLessonIndex=0;const p=courseUserProfile();const t=deepTracks[key];while(deepLessonIndex<t.lessons.length && p?.completed?.[`${key}_${deepLessonIndex}`])deepLessonIndex++;if(deepLessonIndex>=t.lessons.length)deepLessonIndex=t.lessons.length-1;document.getElementById("courseHome").hidden=true;document.getElementById("deepTrackView").hidden=false;document.getElementById("trackEyebrow").textContent=`${t.icon} EĞİTİM YOLU`;document.getElementById("trackTitle").textContent=t.name;document.getElementById("trackDescription").textContent=t.description;renderLessonMap();renderDeepLesson();}
+function renderLessonMap(){const el=document.getElementById("lessonMap"),t=deepTracks[activeTrack],p=courseUserProfile();el.innerHTML=t.lessons.map((l,i)=>{const done=!!p?.completed?.[`${activeTrack}_${i}`];return `<button class="map-lesson ${i===deepLessonIndex?"active":""} ${done?"done":""}" data-i="${i}"><span>${done?"✓":String(i+1).padStart(2,"0")}</span><b>${l.title}</b></button>`}).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.i);const p=courseUserProfile();if(i>0&&!p?.completed?.[`${activeTrack}_${i-1}`]){deepFeedback("Önce bir önceki görevi tamamla. Böylece temelleri atlamıyoruz.",false);return;}deepLessonIndex=i;renderLessonMap();renderDeepLesson();});}
+function renderDeepLesson(){const t=deepTracks[activeTrack],l=t.lessons[deepLessonIndex],done=!!courseUserProfile()?.completed?.[`${activeTrack}_${deepLessonIndex}`];document.getElementById("lessonBreadcrumb").textContent=`${t.icon} ${t.name}  /  Bölüm ${deepLessonIndex+1}`;document.getElementById("deepLessonTitle").textContent=l.title;document.getElementById("deepLessonText").innerHTML=`<p>${l.text}</p>`;document.getElementById("deepExample").innerHTML=`<div class="example-label">👀 ÖRNEK / MANTIĞI GÖR</div><pre>${l.example}</pre>`;const area=document.getElementById("practiceArea");if(l.kind==="webcode")renderWebPractice(area,l);else if(l.kind==="code")renderCodePractice(area,l);else renderTextPractice(area,l,done);document.getElementById("trackProgressText").textContent=`${deepTrackDone(activeTrack)} / ${t.lessons.length} bölüm`;document.getElementById("trackProgressBar").style.width=`${Math.round(deepTrackDone(activeTrack)/t.lessons.length*100)}%`;academyStats();}
+function renderTextPractice(area,l,done){area.innerHTML=`<div class="practice-title">🧪 ŞİMDİ SEN DENE</div><p>${l.task}</p><div class="answer-row"><input id="deepAnswer" class="exercise-input" placeholder="Cevabını kendin yaz..." ${done?"disabled":""}><button id="deepCheck" class="exercise-check" ${done?"disabled":""}>${done?"✓ Tamamlandı":"Kontrol Et"}</button></div>`;if(!done){document.getElementById("deepCheck").onclick=()=>checkDeepText(l);}else deepFeedback("Bu bölümü daha önce tamamladın. İstersen yukarıdaki örneği tekrar inceleyebilirsin.",true);}
+function checkDeepText(l){const v=normalizeAnswer(document.getElementById("deepAnswer").value);const a=normalizeAnswer(l.answer);let ok=v===a||a.split(" ").every(x=>v.includes(x));if(l.title==="Fonksiyonlar")ok=v.includes("tekrar")||v.includes("kullan");if(l.title==="Bilgisayar nasıl düşünür?")ok=v.split(/\s+/).length>=3;if(!ok){practiceAttempts++;deepFeedback("Henüz değil. İpucunu tekrar oku ve kendi cevabını dene.",false);return;}saveDeepCompletion();deepFeedback("Doğru. Şimdi bunu sen yaptın — bölüm tamamlandı! +25 XP",true);setTimeout(nextDeepLesson,700);}
+function renderCodePractice(area,l){area.innerHTML=`<div class="practice-title">⌨️ KODU SEN YAZ</div><p>${l.task}</p><textarea id="codePractice" class="academy-code">${l.starter}</textarea><button id="runCodePractice" class="exercise-check">▶ Çalıştır / Kontrol Et</button><pre id="codeOutput" class="code-output">Hazır. Kodunu yaz ve çalıştır.</pre>`;document.getElementById("runCodePractice").onclick=()=>{const code=document.getElementById("codePractice").value;const out=document.getElementById("codeOutput");if(!code.trim()){out.textContent="Kod alanı boş. Önce kendin yazmayı dene.";return;}if(code.includes("console")||code.includes("puan")){saveDeepCompletion();out.textContent="✓ Kodunda gerekli yapı görünüyor. Görev tamamlandı! +25 XP";deepFeedback("Çalıştırma kontrolünü geçtin. Sonraki bölüm açıldı.",true);setTimeout(nextDeepLesson,700);}else{out.textContent="Henüz gerekli yapı görünmüyor. Örneği tekrar incele ve kendin düzelt.";deepFeedback("Biraz daha dene.",false);}};}
+function renderWebPractice(area,l){area.innerHTML=`<div class="practice-title">🌐 CANLI SİTE LABORATUVARI</div><p>${l.task}</p><div class="web-lab"><div class="lab-editors"><label>HTML<textarea id="labHTML"><h1>Benim Sitem</h1>\n<p>Burayı kendin değiştir.</p>\n<button id="labButton">Tıkla</button></textarea></label><label>CSS<textarea id="labCSS">body { font-family: sans-serif; padding: 30px; }\nh1 { letter-spacing: 1px; }</textarea></label><label>JavaScript<textarea id="labJS">document.addEventListener('click', (e) => {\n  if(e.target.id === 'labButton') e.target.textContent = 'Çalıştı!';\n});</textarea></label></div><iframe id="livePreview" title="Canlı önizleme"></iframe></div><button id="runLab" class="exercise-check">▶ Önizlemeyi Güncelle</button><button id="finishLab" class="course-start small-finish">✓ Görevi Tamamladım</button>`;const update=()=>{const html=document.getElementById("labHTML").value,css=document.getElementById("labCSS").value,js=document.getElementById("labJS").value;document.getElementById("livePreview").srcdoc=`<style>${css}</style>${html}<script>${js.replace(/<\/script>/gi,"<\\/script>")}<\/script>`;};document.getElementById("runLab").onclick=update;document.getElementById("finishLab").onclick=()=>{saveDeepCompletion();deepFeedback("Kendi kodunu çalıştırıp görevi tamamladın! +25 XP",true);setTimeout(nextDeepLesson,700);};update();}
+function deepFeedback(msg,good){const el=document.getElementById("deepFeedback");el.textContent=(good?"✅ ":"💡 ")+msg;el.className=`course-feedback ${good?"good":"bad"}`;}
+function nextDeepLesson(){const t=deepTracks[activeTrack];if(deepLessonIndex<t.lessons.length-1){deepLessonIndex++;renderLessonMap();renderDeepLesson();}else{deepFeedback("🎉 Bu eğitim yolunu tamamladın! Artık öğrendiklerini kendi projenle birleştirme zamanı.",true);renderLessonMap();}}
+if(courseButton)courseButton.addEventListener("click",openCourse);
+if(courseClose)courseClose.addEventListener("click",closeCourse);
+if(courseModal)courseModal.addEventListener("click",e=>{if(e.target===courseModal)closeCourse();});
+document.getElementById("backToTracks")?.addEventListener("click",()=>{document.getElementById("courseHome").hidden=false;document.getElementById("deepTrackView").hidden=true;academyStats();});
+renderTrackCards();
 
-function openCourse() {
-    if (!courseModal) return;
-    selectedLanguages = [];
-    activeLanguage = null;
-    lessonIndex = 0;
-    renderLanguageChoices();
-    courseSelection.hidden = false;
-    courseLearning.hidden = true;
-    selectionCount.textContent = "0 / 2 dil seçildi";
-    startCourse.disabled = true;
-    courseModal.classList.add("open");
-    courseModal.setAttribute("aria-hidden", "false");
-}
-
-function closeCourse() {
-    if (!courseModal) return;
-    courseModal.classList.remove("open");
-    courseModal.setAttribute("aria-hidden", "true");
-}
-
-function renderTabs() {
-    languageTabs.innerHTML = selectedLanguages.map(key => `
-        <button class="language-tab ${key === activeLanguage ? "active" : ""}" type="button" data-language="${key}">${courseLanguages[key].name}</button>
-    `).join("");
-    languageTabs.querySelectorAll(".language-tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-            activeLanguage = tab.dataset.language;
-            lessonIndex = 0;
-            renderLesson();
-            renderTabs();
-        });
-    });
-}
-
-function renderLesson() {
-    const lang = courseLanguages[activeLanguage];
-    const lesson = lang.lessons[lessonIndex];
-    const total = lang.lessons.length;
-    const percent = Math.round(((lessonIndex) / total) * 100);
-
-    learningTitle.textContent = `${lang.icon} ${lang.name} — ${lesson.title}`;
-    lessonProgressText.textContent = `Ders ${lessonIndex + 1} / ${total}`;
-    lessonProgressPercent.textContent = `${percent}%`;
-    lessonProgress.style.width = `${percent}%`;
-
-    lessonContent.innerHTML = `
-        <h3>${lesson.title}</h3>
-        <p>${lesson.text}</p>
-        <code>${lesson.code}</code>
-    `;
-
-    exerciseBox.innerHTML = `
-        <div class="exercise-title">🧠 Alıştırma</div>
-        <p class="exercise-question">${lesson.question}</p>
-        <input id="exerciseInput" class="exercise-input" type="text" autocomplete="off" placeholder="Cevabını yaz...">
-        <button id="checkExercise" class="exercise-check" type="button">Cevabı Kontrol Et</button>
-    `;
-    courseFeedback.textContent = "";
-    if (lessonInfo) lessonInfo.hidden = true;
-
-    const input = document.getElementById("exerciseInput");
-    const check = document.getElementById("checkExercise");
-    check.addEventListener("click", () => checkAnswer(input, lesson.answer));
-    input.addEventListener("keydown", event => {
-        if (event.key === "Enter") checkAnswer(input, lesson.answer);
-    });
-}
-
-function normalizeAnswer(value) {
-    return value.toLowerCase().trim().replace(/[<>"'`]/g, "").replace(/\s+/g, " ");
-}
-
-function playCourseSound(type){
-    try{
-        const C=window.AudioContext||window.webkitAudioContext; if(!C)return;
-        const ctx=new C(), osc=ctx.createOscillator(), gain=ctx.createGain();
-        osc.type=type==="correct"?"sine":"square";
-        osc.frequency.setValueAtTime(type==="correct"?660:180,ctx.currentTime);
-        if(type==="correct")osc.frequency.exponentialRampToValueAtTime(990,ctx.currentTime+.18);
-        gain.gain.setValueAtTime(.0001,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.02); gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.35);
-        osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.36);
-    }catch(e){}
-}
-
-function showLessonInfo(lesson, lang){
-    if(!lessonInfo)return;
-    const tipMap={
-      "HTML nedir?":"HTML dosyaları genellikle .html uzantısıyla kaydedilir. Tarayıcı bu dosyayı okuyup sayfanın iskeletini oluşturur.",
-      "CSS nedir?":"CSS ile HTML'nin yapısını değiştirmeden görünümünü değiştirebilirsin. Bu yüzden HTML + CSS birlikte çok kullanılır.",
-      "JavaScript nedir?":"JavaScript sadece tarayıcıda değil, sunucu tarafında ve farklı uygulamalarda da kullanılabilir.",
-      "Python nedir?":"Python'da kodun okunabilir olması özellikle yeni başlayanlar için büyük bir avantajdır.",
-      "C# nedir?":"C# Unity'de oyun davranışları oluşturmak için en çok kullanılan dillerden biridir.",
-      "C++ nedir?":"C++ oyun motorları, masaüstü yazılımları ve performansın önemli olduğu birçok sistemde kullanılır.",
-      "Java nedir?":"Java, farklı işletim sistemlerinde çalışabilen uygulamalar geliştirmek için uzun süredir kullanılan bir dildir.",
-      "SQL nedir?":"SQL veritabanındaki bilgileri eklemek, bulmak, değiştirmek ve silmek için kullanılır."
-    };
-    const info=lesson.tip||tipMap[lesson.title]||`${lang.name} öğrenirken bu kavramı küçük projelerde tekrar etmek öğrenmeyi kolaylaştırır.`;
-    lessonInfo.innerHTML=`<div class="lesson-info-icon">💡</div><div><strong>Bölüm Bilgisi</strong><p>${info}</p></div><button id="nextLessonButton" type="button">➡️ Sonraki Bölüm</button>`;
-    lessonInfo.hidden=false;
-    document.getElementById("nextLessonButton")?.addEventListener("click",advanceLesson);
-}
-function advanceLesson(){
-    const lang=courseLanguages[activeLanguage];
-    lessonIndex++;
-    if(lessonIndex>=lang.lessons.length){
-        lessonIndex=lang.lessons.length-1; lessonProgressPercent.textContent="100%"; lessonProgress.style.width="100%";
-        courseFeedback.textContent="🎉 Bu dildeki başlangıç derslerini tamamladın!";
-        if(lessonInfo)lessonInfo.hidden=true; return;
-    }
-    renderLesson();
-}
-function checkAnswer(input, answer) {
-    if (!input || !courseBox) return;
-    const correct = normalizeAnswer(input.value) === normalizeAnswer(answer);
-    courseBox.classList.remove("course-correct", "course-wrong"); void courseBox.offsetWidth;
-    if (!correct) {
-        playCourseSound("wrong"); courseBox.classList.add("course-wrong");
-        courseFeedback.textContent = "❌ Yanlış cevap. Tekrar dene!";
-        setTimeout(() => courseBox.classList.remove("course-wrong"), 3000); return;
-    }
-    playCourseSound("correct"); courseBox.classList.add("course-correct");
-    courseFeedback.textContent = "✅ Doğru! Bölümü geçtin. Önce kısa bir bilgi!";
-    setTimeout(() => {
-        courseBox.classList.remove("course-correct");
-        const lang=courseLanguages[activeLanguage], lesson=lang.lessons[lessonIndex];
-        showLessonInfo(lesson,lang);
-    },3000);
-}
-
-
-if (courseButton) courseButton.addEventListener("click", openCourse);
-if (courseClose) courseClose.addEventListener("click", closeCourse);
-if (courseModal) {
-    courseModal.addEventListener("click", event => {
-        if (event.target === courseModal) closeCourse();
-    });
-}
-if (startCourse) {
-    startCourse.addEventListener("click", () => {
-        if (selectedLanguages.length === 0) return;
-        activeLanguage = selectedLanguages[0];
-        const resumeUser = currentRealUser();
-        const resumeProfile = resumeUser ? getProfile(resumeUser.name) : null;
-        lessonIndex = resumeProfile?.languages?.[activeLanguage]?.lesson || 0;
-        courseSelection.hidden = true;
-        courseLearning.hidden = false;
-        renderTabs();
-        renderLesson();
-    });
-}
-document.addEventListener("keydown", event => {
-    if (event.key === "Escape") closeCourse();
-});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeCourse();});
 
 // ----------------------------------------------------
 // GELİŞMİŞ PROFİL: XP, SEVİYE, ROZETLER, İLERLEME, SERİ

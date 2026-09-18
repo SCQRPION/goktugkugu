@@ -995,3 +995,61 @@ body[data-theme="light"] .quiz-setup-grid select { background:#fff;color:#102218
 @media(max-width:850px){.deep-course-box{padding:18px!important}.deep-course-head,.track-header{display:block}.academy-stats{margin-top:14px}.learning-roadmap{justify-content:flex-start;overflow:auto}.road-line{min-width:25px}.track-grid{grid-template-columns:1fr}.deep-layout{grid-template-columns:1fr}.lesson-map{max-height:220px}.web-lab{grid-template-columns:1fr}.deep-lesson h3{font-size:25px}.answer-row{display:block}.answer-row button{margin-top:9px;width:100%}.small-finish{margin:9px 0 0;width:100%}}
 
 .academy-launch-button{margin-top:10px}
+
+
+/* =========================================================
+   V4 — DAHA BÜYÜK EĞİTİM ARAYÜZÜ + DUYURU + GERİ BİLDİRİM
+   Eski stiller silinmedi; bunlar onların üzerine eklenir.
+========================================================= */
+.admin-announcement-banner{
+  position:fixed; top:82px; left:50%; transform:translateX(-50%);
+  width:min(900px,calc(100% - 28px)); z-index:49000;
+  padding:0; border-radius:20px; overflow:hidden;
+  background:linear-gradient(135deg,rgba(10,28,20,.98),rgba(16,45,31,.98));
+  border:1px solid rgba(134,239,172,.34);
+  box-shadow:0 22px 70px rgba(0,0,0,.45),0 0 38px rgba(34,197,94,.14);
+  animation:announcementIn .45s cubic-bezier(.2,.8,.2,1);
+}
+.admin-announcement-banner[hidden]{display:none}
+.announcement-inner{position:relative;padding:18px 54px 19px 22px}
+.announcement-badge{font-size:12px;letter-spacing:1.7px;font-weight:950;text-transform:uppercase;color:#86efac;margin-bottom:7px}
+.announcement-text{font-size:clamp(16px,2vw,20px);font-weight:800;line-height:1.45;color:#f0fff6;white-space:pre-wrap;overflow-wrap:anywhere}
+.announcement-close{position:absolute;right:13px;top:11px;width:36px;height:36px;border:0;border-radius:11px;background:rgba(255,255,255,.07);color:#d9fbe6;font-size:25px;cursor:pointer}
+.announcement-close:hover{background:rgba(255,255,255,.13)}
+@keyframes announcementIn{from{opacity:0;transform:translate(-50%,-18px) scale(.98)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+
+.deep-course-box{
+  width:min(1420px,calc(100vw - 30px))!important;
+  max-width:none!important;
+  max-height:94vh!important;
+  min-height:min(760px,88vh);
+  padding:36px!important;
+}
+.deep-course-head{padding-bottom:28px!important}
+.deep-course-head h2{font-size:clamp(34px,4vw,52px)!important}
+.deep-layout{gap:24px!important}
+.lesson-map{min-width:260px!important}
+.map-lesson{min-height:58px!important;padding:13px 14px!important;font-size:15px!important}
+.deep-lesson{min-height:560px!important;padding:30px!important}
+.deep-lesson h3{font-size:clamp(28px,3vw,42px)!important;line-height:1.15!important}
+.deep-lesson p{font-size:17px!important;line-height:1.8!important}
+.practice-title{font-size:14px!important;letter-spacing:1.4px!important}
+.answer-row{gap:12px!important}
+.exercise-input{min-height:56px!important;font-size:17px!important}
+.exercise-check,.course-start{min-height:54px!important;padding:0 24px!important;font-size:15px!important;font-weight:950!important;cursor:pointer!important}
+.academy-code{min-height:300px!important;font-size:15px!important;line-height:1.65!important}
+.code-output{min-height:80px!important;font-size:15px!important}
+.web-lab textarea{min-height:190px!important;font-size:14px!important}
+.web-lab iframe{min-height:470px!important}
+.course-feedback{font-size:16px!important;min-height:42px!important;padding:8px!important;border-radius:12px!important}
+.academy-success-flash{animation:academyGood .7s ease}
+.academy-error-flash{animation:academyBad .7s ease}
+@keyframes academyGood{0%{box-shadow:0 0 0 rgba(34,197,94,0)}45%{box-shadow:0 0 70px rgba(34,197,94,.72)}100%{box-shadow:0 0 0 rgba(34,197,94,0)}}
+@keyframes academyBad{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+
+@media(max-width:850px){
+  .admin-announcement-banner{top:68px}
+  .deep-course-box{width:calc(100vw - 12px)!important;min-height:94vh;padding:18px!important}
+  .deep-lesson{min-height:auto!important;padding:20px!important}
+  .web-lab iframe{min-height:330px!important}
+}

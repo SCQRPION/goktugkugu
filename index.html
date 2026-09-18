@@ -266,6 +266,9 @@
             <button id="courseButton" class="course-button" type="button">
                 🎓 İSTEDİĞİN DİLİ BAŞLANGIÇ SEVİYESİNDEN EN SONUNA KADAR ÖĞREN
             </button>
+            <button id="academyButton" class="course-button academy-launch-button" type="button">
+                🚀 GÖKTUĞ CODE ACADEMY — SIFIRDAN ÖĞREN & UYGULA
+            </button>
         </div>
     </section>
 
@@ -373,13 +376,46 @@
 </main>
 
     <div id="courseModal" class="course-modal" aria-hidden="true">
-      <div class="course-box deep-course-box" role="dialog" aria-modal="true" aria-labelledby="courseTitle">
-        <button id="courseClose" class="course-close" type="button" aria-label="Kapat">×</button>
-        <div class="deep-course-head">
-          <div><p class="small-title">🎓 GÖKTUĞ CODE ACADEMY</p><h2 id="courseTitle">Sıfırdan kodlama öğren</h2><p>Ezberleme. Önce anla, sonra kendin yaz, ardından gerçek bir şey üret.</p></div>
-          <div class="academy-stats"><span id="academyXP">0 XP</span><span id="academyProgress">0% ilerleme</span></div>
+        <div class="course-box" role="dialog" aria-modal="true" aria-labelledby="courseTitle">
+            <button id="courseClose" class="course-close" type="button" aria-label="Kapat">×</button>
+
+            <div id="courseSelection" class="course-view">
+                <p class="small-title">🎓 ÜCRETSİZ KURS</p>
+                <h2 id="courseTitle">Hangi yazılım dilini öğrenmek istiyorsun?</h2>
+                <p class="course-note">En fazla <strong>2 dil</strong> seçebilirsin. Daha önce başladıysan kaldığın bölüm otomatik açılır.</p>
+                <div id="languageGrid" class="language-grid"></div>
+                <p id="selectionCount" class="selection-count">0 / 2 dil seçildi</p>
+                <button id="startCourse" class="course-start" type="button" disabled>🚀 KURSA BAŞLA</button>
+            </div>
+
+            <div id="courseLearning" class="course-view" hidden>
+                <div class="course-topbar">
+                    <div>
+                        <p class="small-title">KURS</p>
+                        <h2 id="learningTitle">Ders</h2>
+                    </div>
+                    <div id="languageTabs" class="language-tabs"></div>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-info"><span id="lessonProgressText">Ders 1</span><span id="lessonProgressPercent">0%</span></div>
+                    <div class="progress-bar"><div id="lessonProgress" class="progress-fill"></div></div>
+                </div>
+                <article id="lessonContent" class="lesson-content"></article>
+                <div id="exerciseBox" class="exercise-box"></div>
+                <p id="courseFeedback" class="course-feedback" aria-live="polite"></p>
+                <div id="lessonInfo" class="lesson-info" hidden></div>
+            </div>
         </div>
-        <div id="courseHome" class="deep-course-view">
+    </div>
+
+    <div id="academyModal" class="course-modal" aria-hidden="true">
+      <div class="course-box deep-course-box" role="dialog" aria-modal="true" aria-labelledby="academyTitle">
+        <button id="academyClose" class="course-close" type="button" aria-label="Kapat">×</button>
+        <div class="deep-course-head">
+          <div><p class="small-title">🎓 GÖKTUĞ CODE ACADEMY</p><h2 id="academyTitle">Sıfırdan kodlama öğren</h2><p>Ezberleme. Önce anla, sonra kendin yaz, ardından gerçek bir şey üret.</p></div>
+          <div class="academy-stats"><span id="academyXP2">0 XP</span><span id="academyProgress2">0% ilerleme</span></div>
+        </div>
+        <div id="academyHome" class="deep-course-view">
           <div class="learning-roadmap">
             <div class="road-step active"><b>01</b><span>Temeller</span><small>Programlamanın alfabesi</small></div>
             <div class="road-line"></div><div class="road-step"><b>02</b><span>Üret</span><small>Öğrendiklerini uygula</small></div>
@@ -392,24 +428,25 @@
           </div>
           <div class="academy-note"><b>💡 Sistem nasıl çalışıyor?</b><span>Her bölümde önce konu anlatımı, sonra örnek, ardından senin yazacağın kod ve mini görev var. Görevi geçmeden ilerleme kaybolmuyor.</span></div>
         </div>
-        <div id="deepTrackView" class="deep-course-view" hidden>
-          <button id="backToTracks" class="course-back" type="button">← Eğitim yollarına dön</button>
-          <div class="track-header"><div><p class="small-title" id="trackEyebrow">YOL</p><h2 id="trackTitle"></h2><p id="trackDescription"></p></div><div class="track-progress"><b id="trackProgressText">0 / 0</b><div><i id="trackProgressBar"></i></div></div></div>
+        <div id="academyTrackView" class="deep-course-view" hidden>
+          <button id="academyBackToTracks" class="course-back" type="button">← Eğitim yollarına dön</button>
+          <div class="track-header"><div><p class="small-title" id="academyTrackEyebrow">YOL</p><h2 id="academyTrackTitle"></h2><p id="academyTrackDescription"></p></div><div class="track-progress"><b id="academyTrackProgressText">0 / 0</b><div><i id="academyTrackProgressBar"></i></div></div></div>
           <div class="deep-layout">
-            <aside id="lessonMap" class="lesson-map"></aside>
+            <aside id="academyLessonMap" class="lesson-map"></aside>
             <main class="deep-lesson">
-              <div class="lesson-breadcrumb" id="lessonBreadcrumb"></div>
-              <h3 id="deepLessonTitle"></h3>
-              <div id="deepLessonText" class="deep-lesson-text"></div>
-              <div id="deepExample" class="deep-example"></div>
-              <div id="practiceArea" class="practice-area"></div>
-              <div id="deepFeedback" class="course-feedback" aria-live="polite"></div>
-              <div id="deepLessonInfo" class="lesson-info" hidden></div>
+              <div class="lesson-breadcrumb" id="academyLessonBreadcrumb"></div>
+              <h3 id="academyLessonTitle"></h3>
+              <div id="academyLessonText" class="deep-lesson-text"></div>
+              <div id="academyExample" class="deep-example"></div>
+              <div id="academyPracticeArea" class="practice-area"></div>
+              <div id="academyFeedback" class="course-feedback" aria-live="polite"></div>
+              <div id="academyLessonInfo" class="lesson-info" hidden></div>
             </main>
           </div>
         </div>
       </div>
     </div>
+
 
     <div id="musicModal" class="music-modal" aria-hidden="true">
         <div class="music-modal-box" role="dialog" aria-modal="true" aria-labelledby="musicModalTitle">

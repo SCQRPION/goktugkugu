@@ -450,6 +450,12 @@
             <button class="track-card" data-track="game"><span>🎮</span><strong>Sıfırdan Oyun Geliştirme</strong><p>C# ve oyun mantığını temel seviyeden başlayarak öğren.</p><small>Değişken → Hareket → Çarpışma → Oyun</small></button>
           </div>
           <div class="academy-note"><b>💡 Sistem nasıl çalışıyor?</b><span>Her bölümde önce konu anlatımı, sonra örnek, ardından senin yazacağın kod ve mini görev var. Görevi geçmeden ilerleme kaybolmuyor.</span></div>
+          <div class="academy-feature-grid">
+            <button id="academyRoadmapButton" class="academy-feature-card" type="button"><span>🗺️</span><b>Yol Haritam</b><small>Ne öğrendiğini ve sıradaki hedefini gör.</small></button>
+            <button id="academyBigProjectButton" class="academy-feature-card" type="button"><span>🏗️</span><b>Büyük Proje</b><small>Gerçek bir siteyi adım adım kendin oluştur.</small></button>
+            <button id="academyExamButton" class="academy-feature-card" type="button"><span>🏆</span><b>Bölüm Sınavı</b><small>Öğrendiklerini sınavla kontrol et.</small></button>
+            <button id="academyLabButton" class="academy-feature-card" type="button"><span>💻</span><b>Gerçek Kod Laboratuvarı</b><small>HTML + CSS + JavaScript'i canlı çalıştır.</small></button>
+          </div>
         </div>
         <div id="academyTrackView" class="deep-course-view" hidden>
           <button id="academyBackToTracks" class="course-back" type="button">← Eğitim yollarına dön</button>
@@ -463,10 +469,18 @@
               <div id="academyExample" class="deep-example"></div>
               <div id="academyPracticeArea" class="practice-area"></div>
               <div id="academyFeedback" class="course-feedback" aria-live="polite"></div>
+              <div id="academyErrorTeacher" class="academy-error-teacher" hidden></div>
               <div id="academyLessonInfo" class="lesson-info" hidden></div>
             </main>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div id="academyFeatureModal" class="course-modal" aria-hidden="true">
+      <div class="course-box academy-feature-box" role="dialog" aria-modal="true">
+        <button id="academyFeatureClose" class="course-close" type="button" aria-label="Kapat">×</button>
+        <div id="academyFeatureContent"></div>
       </div>
     </div>
 

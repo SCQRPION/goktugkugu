@@ -1087,6 +1087,7 @@ function checkAcademyText(l){
    const hint=academyHintFor(l);
    const extra=academyPracticeAttempts>=3 ? ` <div class="smart-hint">💡 <b>3 deneme oldu.</b> Küçük yardım: ${hint}</div>` : "";
    academyFeedback("Henüz değil. İpucunu tekrar oku ve kendi cevabını dene."+extra,false);
+   academyShowErrorTeacher(l, input.value);
    return;
  }
  academyPracticeAttempts=0;
@@ -1144,6 +1145,7 @@ function renderAcademyCodePractice(area,l){
        out.textContent="💡 3 deneme oldu. Küçük yardım açıldı. Şimdi kodu kendin düzelt.";
      }
      academyFeedback(attempts>=3?"3 denemeye ulaştın; küçük yardım açıldı.":"Biraz daha dene.",false);
+     academyShowErrorTeacher(l, code);
    }
  };
 }
@@ -1487,4 +1489,113 @@ renderAcademyTrackCards();
     const a=e.target;
     if(a.matches("#academyAnswer")){e.preventDefault();document.querySelector("#academyCheck")?.click()}
   });
+})();
+
+
+/* =========================================================
+   V7 — YOL HARİTASI + HATA ÖĞRETMENİ + SINAVLAR + LAB + BÜYÜK PROJE
+   Eski sistemin üstüne eklenir; mevcut dersler korunur.
+========================================================= */
+(function(){
+  const featureModal=document.getElementById('academyFeatureModal');
+  const featureContent=document.getElementById('academyFeatureContent');
+  const closeFeature=()=>{if(!featureModal)return;featureModal.classList.remove('open');featureModal.setAttribute('aria-hidden','true');};
+  const openFeature=(html)=>{if(!featureModal)return;featureContent.innerHTML=html;featureModal.classList.add('open');featureModal.setAttribute('aria-hidden','false');};
+  document.getElementById('academyFeatureClose')?.addEventListener('click',closeFeature);
+  featureModal?.addEventListener('click',e=>{if(e.target===featureModal)closeFeature();});
+
+  window.academyShowErrorTeacher=function(l,userCode){
+    const el=document.getElementById('academyErrorTeacher'); if(!el)return;
+    const code=String(userCode||'').trim();
+    const title=(l?.title||'Bu görev').toLowerCase();
+    let why='Cevabın beklenen mantıkla eşleşmedi. Önce görevde istenen şeyi tek parçaya ayır.';
+    if(title.includes('html')) why='HTML görevlerinde etiketin adını ve açılış/kapanış yapısını kontrol et.';
+    else if(title.includes('css')) why='CSS görevlerinde özellik adını, iki noktayı ve değer kısmını kontrol et.';
+    else if(title.includes('javascript')||title.includes('js')) why='JavaScript görevlerinde değişken, koşul, fonksiyon ve olay isimlerini kontrol et.';
+    else if(title.includes('değişken')) why='Değişkenin adını ve içine koyduğun değeri ayrı ayrı kontrol et.';
+    else if(title.includes('koşul')) why='Koşulun doğru/yanlış sonucuna göre hangi yolun çalışacağını düşün.';
+    else if(title.includes('döngü')) why='Döngünün başlangıç, bitiş ve tekrar kısmını kontrol et.';
+    else if(title.includes('fonksiyon')) why='Fonksiyonun hangi işi tekrar kullanmak için topladığını düşün.';
+    else if(l?.kind==='code') why='Kodun çalışması yetmez; görevde istenen yapının gerçekten kodunda bulunup bulunmadığını kontrol et.';
+    el.hidden=false;
+    el.innerHTML=`<b>🧑‍🏫 Hata Öğretmeni</b><p>${why}</p><small>Ben cevabı vermiyorum. ${code?'Yazdığın kodu/cevabı bir kez daha parçalayarak kontrol et.':'Örneği tekrar incele, sonra kendin yaz.'}</small>`;
+  };
+
+  function roadmap(){
+    const p=academyUserProfile()||{completed:{}};
+    const rows=[]; let n=0;
+    Object.entries(academyTracks).forEach(([key,t])=>{
+      const done=academyTrackDone(key), total=t.lessons.length, pct=Math.round(done/total*100);
+      rows.push(`<div class="roadmap-row ${done===0?'locked':''}"><span class="roadmap-num">${t.icon}</span><div><b>${t.name}</b><small>${done}/${total} bölüm tamamlandı · ${pct}%</small></div><span class="roadmap-badge">${pct===100?'✓ TAMAM':pct+'%'}</span></div>`);
+      n+=done;
+    });
+    const next=Object.entries(academyTracks).flatMap(([key,t])=>t.lessons.map((l,i)=>({key,t,l,i}))).find(x=>!p.completed?.[`${x.key}_${x.i}`]);
+    openFeature(`<p class="small-title">🗺️ YOL HARİTASI</p><h2 class="feature-title">Kodlama yolculuğun</h2><p class="feature-sub">Sıradaki adımını kaybetme. Önce temel, sonra üretim, sonra proje.</p><div class="roadmap-list">${rows.join('')}</div>${next?`<div class="academy-note" style="margin-top:14px"><b>🎯 Sıradaki hedef: ${next.t.icon} ${next.l.title}</b><span>${next.t.name} · Bölüm ${next.i+1}</span></div>`:'<div class="academy-note" style="margin-top:14px"><b>🏆 Tüm eğitim yolları tamamlandı!</b><span>Artık büyük projeye geçebilirsin.</span></div>'}`);
+  }
+
+  const exams={
+    fundamentals:[
+      ['Değişken ne işe yarar?',['Bilgi saklamaya','Sadece renk değiştirmeye','İnternete bağlanmaya'],0],
+      ['if / else ne sağlar?',['Karar vermeyi','Resim çizmeyi','Dosya silmeyi'],0],
+      ['Döngü neden kullanılır?',['Tekrar eden işleri kolaylaştırmak için','Sadece hata vermek için','Şifre oluşturmak için'],0],
+      ['Fonksiyon nedir?',['Belirli işi yapan tekrar kullanılabilir kod bloğu','Bir resim dosyası','HTML etiketi'],0]
+    ],
+    web:[
+      ['HTML temel olarak neyi tanımlar?',['Sayfanın yapısını','Sadece sesleri','Sunucu parolasını'],0],
+      ['CSS ne için kullanılır?',['Görünüm ve tasarım','Veritabanı şifresi','İşletim sistemi'],0],
+      ['JavaScript web sayfasına ne ekler?',['Davranış ve etkileşim','Sadece yazı tipi','Sadece resim'],0],
+      ['Canlı laboratuvarın amacı nedir?',['Kodu yazıp sonucu anında görmek','Sadece kod okumak','Dosya indirmek'],0]
+    ],
+    game:[
+      ['Oyuncunun canı gibi değişen değerler nerede tutulur?',['Değişkenlerde','Sadece başlıkta','Resimlerde'],0],
+      ['Oyun kuralları çoğunlukla neyle kontrol edilir?',['Koşullarla','Sadece CSS ile','Sadece HTML ile'],0],
+      ['C# ile oyun geliştirirken kodun görevi nedir?',['Oyun davranışlarını tanımlamak','Sadece arka plan resmi yapmak','Sadece ses açmak'],0],
+      ['İyi bir oyun sisteminde geri bildirim neden önemlidir?',['Oyuncuya ne olduğunu göstermek için','Kodun rengini değiştirmek için','Dosya adını uzatmak için'],0]
+    ]
+  };
+  function examChooser(){
+    openFeature(`<p class="small-title">🏆 BÖLÜM SINAVLARI</p><h2 class="feature-title">Hangi yolu sınayalım?</h2><p class="feature-sub">4 soruluk mini sınav. Sonuçta hangi konuları tekrar etmen gerektiğini göreceksin.</p><div class="track-grid">${Object.entries(academyTracks).map(([k,t])=>`<button class="track-card" data-exam="${k}"><span>${t.icon}</span><strong>${t.name}</strong><p>Sınava başla</p></button>`).join('')}</div>`);
+    featureContent.querySelectorAll('[data-exam]').forEach(b=>b.addEventListener('click',()=>runExam(b.dataset.exam)));
+  }
+  function runExam(key){
+    const qs=exams[key]||exams.fundamentals, t=academyTracks[key];
+    featureContent.innerHTML=`<p class="small-title">${t.icon} ${t.name}</p><h2 class="feature-title">Bölüm Sınavı</h2><p class="feature-sub">Cevaplarını seç ve sınavı bitir.</p><div class="exam-grid">${qs.map((q,i)=>`<div class="exam-question"><b>${i+1}. ${q[0]}</b>${q[1].map((a,j)=>`<label><input type="radio" name="exam${i}" value="${j}"> ${a}</label>`).join('')}</div>`).join('')}</div><button id="finishAcademyExam" class="exercise-check" type="button">🏆 Sınavı Bitir</button><div id="academyExamResult"></div>`;
+    document.getElementById('finishAcademyExam').onclick=()=>{
+      let score=0; qs.forEach((q,i)=>{const a=featureContent.querySelector(`input[name="exam${i}"]:checked`);if(a&&Number(a.value)===q[2])score++;});
+      const pass=score>=3, result=document.getElementById('academyExamResult');
+      result.className=`exam-result ${pass?'good':'bad'}`;
+      result.innerHTML=pass?`<b>🎉 ${score}/${qs.length} doğru!</b><p>Sınavı geçtin. Yanlış çıkan konuları tekrar ederek daha da sağlamlaştırabilirsin.</p>`:`<b>💡 ${score}/${qs.length} doğru.</b><p>Henüz geçemedin. Yanlış çıkan soruların konularına geri dönüp tekrar dene. Cevabı burada vermiyorum.</p>`;
+      try{pass&&v4Sound?.('good')}catch(e){}
+    };
+  }
+
+  function lab(){
+    openFeature(`<p class="small-title">💻 GERÇEK KOD LABORATUVARI</p><h2 class="feature-title">Kodunu yaz, sonucu canlı gör</h2><p class="feature-sub">Bu alan eğitim içindir. HTML + CSS + JavaScript'i birlikte çalıştır.</p><div class="lab-toolbar"><button id="v7RunLab" class="exercise-check" type="button">▶ Çalıştır</button><button id="v7ResetLab" class="course-start small-finish" type="button">↺ Sıfırla</button></div><div class="web-lab"><div class="lab-editors"><label>HTML<textarea id="v7HTML"><main><h1>Benim İlk Sitem</h1><p>Burayı değiştir!</p><button id="v7Button">Tıkla</button></main></textarea></label><label>CSS<textarea id="v7CSS">body{font-family:Arial,sans-serif;padding:30px}h1{margin-bottom:8px}button{padding:10px 16px;border-radius:10px}</textarea></label><label>JavaScript<textarea id="v7JS">document.getElementById('v7Button').addEventListener('click',()=>{document.querySelector('p').textContent='Kodun çalıştı!';});</textarea></label></div><iframe id="v7Preview" class="project-preview" title="Kod laboratuvarı önizleme"></iframe></div>`);
+    const run=()=>{const h=document.getElementById('v7HTML').value,c=document.getElementById('v7CSS').value,j=document.getElementById('v7JS').value;document.getElementById('v7Preview').srcdoc=`<style>${c}</style>${h}<script>${j.replace(/<\/script>/gi,'<\\/script>')}<\/script>`;};
+    document.getElementById('v7RunLab').onclick=run;document.getElementById('v7ResetLab').onclick=()=>{document.getElementById('v7HTML').value='<main><h1>Benim İlk Sitem</h1><p>Burayı değiştir!</p><button id="v7Button">Tıkla</button></main>';run();};run();
+  }
+
+  const projectSteps=[
+    {title:'1. İskeleti kur',desc:'Bir ana başlık, açıklama ve üç bölüm oluştur.',code:'<!doctype html>\n<html>\n<body>\n  <h1>Benim Portföyüm</h1>\n  <p>Kendimi ve projelerimi tanıtıyorum.</p>\n  <section><h2>Hakkımda</h2><p>Buraya kendini yaz.</p></section>\n  <section><h2>Projeler</h2><div class="cards"><article>Proje 1</article><article>Proje 2</article><article>Proje 3</article></div></section>\n</body>\n</html>'},
+    {title:'2. Tasarımı ekle',desc:'Kartlar, boşluklar, yazılar ve arka planla sayfayı kendin tasarla.',code:'<style>body{font-family:Arial;padding:30px;background:#111;color:#fff}.cards{display:flex;gap:12px;flex-wrap:wrap}.cards article{padding:25px;border:1px solid #555;border-radius:14px;min-width:140px}</style>'},
+    {title:'3. Etkileşim ekle',desc:'Bir buton oluştur ve JavaScript ile sayfaya davranış kazandır.',code:'<button id="hello">Bana tıkla</button>\n<script>document.getElementById("hello").onclick=()=>alert("Çalıştı!");</script>'},
+    {title:'4. Yayına hazırla',desc:'Mobil görünümü kontrol et, metinleri kendi bilgilerinle değiştir ve son kez test et.',code:'<!-- Kendi portföyünün son halini burada oluştur. -->'}
+  ];
+  function project(){
+    const saved=JSON.parse(localStorage.getItem('goktug_big_project_v7')||'{}'), step=Math.min(Number(saved.step||0),projectSteps.length-1);
+    openProjectStep(step);
+  }
+  function openProjectStep(step){
+    const st=projectSteps[step], saved=JSON.parse(localStorage.getItem('goktug_big_project_v7')||'{}'), checks=saved.checks||{};
+    featureContent.innerHTML=`<div class="big-project-head"><div><p class="small-title">🏗️ BÜYÜK PROJE</p><h2 class="feature-title">Kendi Portföy Siten</h2><p class="feature-sub">Gerçek bir projeyi küçük parçalara bölerek tamamla.</p></div><b>ADIM ${step+1}/${projectSteps.length}</b></div><div class="big-project-progress"><i style="width:${Math.round((step+1)/projectSteps.length*100)}%"></i></div><div class="project-step"><h3>${st.title}</h3><p>${st.desc}</p><div class="project-checks">${['Görevi okudum','Kodu kendim değiştirdim','Önizlemeyi kontrol ettim'].map((x,i)=>`<label><input type="checkbox" data-pcheck="${i}" ${checks[step+'_'+i]?'checked':''}> ${x}</label>`).join('')}</div><textarea id="bigProjectEditor" class="project-editor">${st.code}</textarea><button id="bigProjectRun" class="exercise-check" type="button">▶ Önizle</button><button id="bigProjectNext" class="course-start small-finish" type="button">${step===projectSteps.length-1?'🏆 Projeyi Tamamla':'Sonraki Adım →'}</button><iframe id="bigProjectPreview" class="project-preview" title="Büyük proje önizleme"></iframe></div>`;
+    const run=()=>{const code=document.getElementById('bigProjectEditor').value;document.getElementById('bigProjectPreview').srcdoc=code;};
+    document.getElementById('bigProjectRun').onclick=run;run();
+    featureContent.querySelectorAll('[data-pcheck]').forEach(c=>c.addEventListener('change',()=>{checks[step+'_'+c.dataset.pcheck]=c.checked;localStorage.setItem('goktug_big_project_v7',JSON.stringify({step,checks}));}));
+    document.getElementById('bigProjectNext').onclick=()=>{const all=[...featureContent.querySelectorAll('[data-pcheck]')].every(x=>x.checked);if(!all){academyShowErrorTeacher({title:'Büyük Proje'},'');const fb=document.createElement('div');fb.className='exam-result bad';fb.innerHTML='<b>💡 Önce üç kontrol kutusunu da tamamla.</b><p>Projeyi gerçekten kendin kurmanı istiyoruz.</p>';featureContent.querySelector('.project-step').appendChild(fb);return;}const next=Math.min(step+1,projectSteps.length-1);localStorage.setItem('goktug_big_project_v7',JSON.stringify({step:next,checks}));if(step===projectSteps.length-1){showAccountNotice('🏆 Büyük proje tamamlandı!');closeFeature();}else openProjectStep(next);};
+  }
+
+  document.getElementById('academyRoadmapButton')?.addEventListener('click',roadmap);
+  document.getElementById('academyBigProjectButton')?.addEventListener('click',project);
+  document.getElementById('academyExamButton')?.addEventListener('click',examChooser);
+  document.getElementById('academyLabButton')?.addEventListener('click',lab);
 })();

@@ -1094,3 +1094,18 @@ body[data-theme="light"] .quiz-setup-grid select { background:#fff;color:#102218
 #academyModal .deep-layout{grid-template-columns:280px minmax(0,1fr)!important}
 #academyModal .deep-lesson{font-size:1.02em}
 @media(max-width:900px){#academyModal .deep-layout{grid-template-columns:1fr!important}}
+
+
+/* V7 — 5 büyük eğitim sistemi */
+.academy-feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.academy-feature-card{border:1px solid rgba(255,255,255,.10);background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border-radius:18px;padding:16px;text-align:left;color:inherit;cursor:pointer;transition:.2s;min-height:128px}
+.academy-feature-card:hover{transform:translateY(-3px);border-color:rgba(90,255,190,.45);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.academy-feature-card span{font-size:25px;display:block;margin-bottom:9px}.academy-feature-card b{display:block;font-size:15px}.academy-feature-card small{display:block;opacity:.65;margin-top:6px;line-height:1.4}
+.academy-error-teacher{margin-top:12px;border:1px solid rgba(255,190,70,.25);background:rgba(255,190,70,.07);border-radius:14px;padding:13px;line-height:1.55}
+.academy-feature-box{max-width:1050px!important;width:min(1050px,94vw)!important;max-height:88vh;overflow:auto}
+.feature-title{font-size:26px;margin:0 0 7px}.feature-sub{opacity:.7;margin:0 0 18px}.roadmap-list{display:grid;gap:10px}.roadmap-row{display:grid;grid-template-columns:45px 1fr auto;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}.roadmap-num{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(90,255,190,.12);font-weight:800}.roadmap-row.locked{opacity:.48}.roadmap-row small{display:block;opacity:.6;margin-top:3px}.roadmap-badge{font-size:12px;padding:6px 9px;border-radius:999px;background:rgba(90,255,190,.1)}
+.exam-grid{display:grid;gap:12px}.exam-question{padding:17px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.035)}.exam-question b{display:block;margin-bottom:9px}.exam-question label{display:block;padding:8px 10px;border-radius:9px;margin:4px 0;cursor:pointer;background:rgba(255,255,255,.025)}.exam-result{margin-top:15px;padding:15px;border-radius:14px}.exam-result.good{background:rgba(70,230,150,.10)}.exam-result.bad{background:rgba(255,90,90,.10)}
+.big-project-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.big-project-progress{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:15px 0}.big-project-progress i{display:block;height:100%;background:currentColor;width:0;transition:.3s}.project-step{padding:18px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}.project-checks{display:grid;gap:9px;margin:15px 0}.project-checks label{display:flex;gap:9px;align-items:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)}.project-editor{width:100%;min-height:300px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.project-preview{width:100%;height:280px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#fff;margin-top:12px}
+.lab-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.lab-toolbar button{cursor:pointer}
+@media(max-width:900px){.academy-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.big-project-head{flex-direction:column}}
+@media(max-width:560px){.academy-feature-grid{grid-template-columns:1fr}.roadmap-row{grid-template-columns:38px 1fr}.roadmap-row .roadmap-badge{grid-column:2;justify-self:start}}
